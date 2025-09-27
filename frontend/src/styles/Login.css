@@ -1,0 +1,140 @@
+/* Better defaults */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #667eea;
+  --primary-dark: #5563c1;
+  --border: #ddd;
+  --text: #222;
+  --muted: #555;
+}
+
+/* Full-page center */
+.login-container {
+  min-height: 105vh;
+  padding: 24px;
+  padding-right : 125px;
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  background-image: url("assets/bgPhoto.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  /* background: linear-gradient(135deg, #667eea, #764ba2); */
+}
+
+/* Card */
+.login-form {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* space between groups */
+}
+
+.login-title {
+  margin: 0 0 6px 0;
+  font-size: 35px;
+  color: var(--text);
+  text-align: center;
+  font-family :Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+/* Groups */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Inputs */
+.input-group input,
+.password-wrapper input {
+  width: 100%;
+  height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-group input:focus,
+.password-wrapper input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+/* Password eye */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 42px; /* room for eye */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Button */
+.btn-login {
+  margin-left: 135px;
+  padding : 5px;
+  width: 35%;
+  height: 46px;
+  border : none;
+  border-radius: 25px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.04s ease;
+}
+
+.btn-login:hover {
+  background: var(--primary-dark);
+}
+
+.btn-login:active {
+  transform: translateY(1px);
+}
+
+/* Message */
+.message {
+  margin-top: 4px;
+  text-align: center;
+  color: crimson;
+  font-size: 14px;
+}
+
+#para{
+  text-align: center;
+  margin-top: 0%;
+  margin-bottom: 10px;
+}
+

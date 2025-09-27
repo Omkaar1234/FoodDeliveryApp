@@ -1,0 +1,100 @@
+.register-container {
+  display :flex;
+  align-items: center;
+  justify-content: right;
+  min-height: 100vh;
+  padding-right: 210px;
+  background-image: url("assets/registerBG.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover ;
+  /* background: linear-gradient(135deg, #ff9a9e, #fad0c4); */
+}
+
+.register-form {
+  align-items: right;
+  background: white;
+  margin-top:40px;
+  padding-top:12px;
+  padding-right: 28px;
+  padding-bottom: 20px;
+  padding-left: 28px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  width: 370px;
+}
+
+.register-title {
+  text-align: center;
+  font-family :Cambria, Cochin, Georgia, Times, 'Times New Roman', serif ;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.input-group input,
+.input-group select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Password input with eye icon */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* space for eye icon */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #888;
+}
+
+.eye-icon:hover {
+  color: #333;
+}
+
+.btn-register {
+  width: 50%;
+  padding: 12px;
+  margin-left:75px;
+  background: #ff758c;
+  color: white;
+  font-weight:bolder;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.btn-register:hover { 
+  background: #e75470;
+}
+
+.message {
+  margin-top: 15px;
+  text-align: center;
+  color: green;
+}
+
+p{
+  text-align: center;
+}

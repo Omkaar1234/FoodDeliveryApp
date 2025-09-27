@@ -1,0 +1,211 @@
+/* Layout */
+.restaurant-dashboard {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #222;
+  color: #fff;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.dashboard-title {
+  font-size: 20px;
+  margin-bottom: 2rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  position: relative; /* needed for notification dot */
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.sidebar ul li:hover,
+.sidebar ul li.active {
+  background: #ff5a5f;
+  color: #fff;
+}
+
+/* Notification Dot */
+.sidebar ul li .notification-dot {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: yellow;
+  border-radius: 50%;
+}
+
+.sidebar ul li .notification-dot.pulse {
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: translateY(-50%) scale(1); opacity: 1; }
+  50% { transform: translateY(-50%) scale(1.4); opacity: 0.7; }
+  100% { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background: #f8f9fa;
+  overflow-y: auto;
+}
+
+/* Orders */
+.order-card {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status {
+  font-weight: bold;
+}
+
+.status.pending { color: orange; }
+.status.preparing { color: #007bff; }
+.status.delivered { color: green; }
+.status.cancelled { color: red; }
+
+/* Buttons */
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 4px 4px 0 0;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.update-btn { background: #007bff; color: #fff; }
+.add-btn { background: #28a745; color: #fff; }
+.edit-btn { background: #ffc107; color: #000; }
+.delete-btn { background: #dc3545; color: #fff; }
+.upload-btn { background: #17a2b8; color: #fff; }
+.save-btn { background: #ff5a5f; color: #fff; }
+
+/* Menu Section */
+.menu-section .add-menu-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.menu-section input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.menu-item {
+  background: #fff;
+  padding: 0.8rem;
+  margin: 0.5rem 0;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.menu-item input {
+  width: 120px;
+  margin-right: 8px;
+}
+
+/* Profile */
+.profile-card {
+  margin-bottom: 1rem;
+}
+
+.restaurant-photo {
+  width: 250px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.profile-form input {
+  display: block;
+  width: 60%;
+  margin: 0.5rem 0;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Analytics */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 900px) {
+  .restaurant-dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .menu-section .add-menu-item {
+    flex-direction: column;
+  }
+
+  .menu-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

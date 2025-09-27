@@ -1,0 +1,67 @@
+/* UserProfile.css */
+
+.profile-container {
+  max-width: 500px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.profile-container h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: #ff5a5f;
+}
+
+.profile-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profile-container input,
+.profile-container textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.profile-container input:focus,
+.profile-container textarea:focus {
+  border: 1px solid #ff5a5f;
+  box-shadow: 0 0 6px rgba(255, 90, 95, 0.4);
+}
+
+.profile-container textarea {
+  resize: none;
+  min-height: 100px;
+}
+
+.profile-container button {
+  background: #ff5a5f;
+  color: #fff;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.profile-container button:hover {
+  background: #e04e52;
+}
+
+.profile-container p {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: green;
+  font-weight: 500;
+}

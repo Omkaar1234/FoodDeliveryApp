@@ -1,0 +1,43 @@
+.restaurant-orders {
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+}
+
+.order-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.order-card {
+  background-color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 300px;
+}
+
+.order-card ul {
+  padding-left: 20px;
+  margin: 5px 0;
+}
+
+.status-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.status-buttons button {
+  padding: 0.3rem 0.6rem;
+  border: none;
+  background-color: #ff5a5f;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.status-buttons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
