@@ -1,17 +1,15 @@
 import express from "express";
 import Order from "../models/Order.js";
-import { authMiddleware, requireRole } from "./authRoutes.js"; // adjust path if needed
+import { authMiddleware, requireRole } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ------------------- Place a new order (User) -------------------
+// ✅ Place a new order (User only)
 router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   try {
     const { restaurantId, items, total, deliveryAddress } = req.body;
-
-    if (!restaurantId || !items || !items.length || !total || !deliveryAddress) {
+    if (!restaurantId || !items || !items.length || !total || !deliveryAddress)
       return res.status(400).json({ error: "All fields are required" });
-    }
 
     const order = new Order({
       userId: req.user.id,
@@ -19,7 +17,7 @@ router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
       items,
       total,
       deliveryAddress,
-      status: "Pending", // default status
+      status: "Pending",
     });
 
     await order.save();
@@ -30,7 +28,7 @@ router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   }
 });
 
-// ------------------- Get all orders for a restaurant -------------------
+// ✅ Get all orders for logged-in restaurant
 router.get("/restaurant", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
     const orders = await Order.find({ restaurantId: req.user.id }).sort({ createdAt: -1 });
@@ -41,7 +39,7 @@ router.get("/restaurant", authMiddleware, requireRole("restaurant"), async (req,
   }
 });
 
-// ------------------- Get all orders for a user -------------------
+// ✅ Get all orders for logged-in user
 router.get("/user", authMiddleware, requireRole("user"), async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
@@ -52,23 +50,18 @@ router.get("/user", authMiddleware, requireRole("user"), async (req, res) => {
   }
 });
 
-// ------------------- Update order status (Restaurant) -------------------
+// ✅ Update order status (Restaurant only)
 router.put("/:id/status", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
     const { status } = req.body;
     const validStatus = ["Pending", "Preparing", "Delivered", "Cancelled"];
-
-    if (!validStatus.includes(status)) {
-      return res.status(400).json({ error: "Invalid status" });
-    }
+    if (!validStatus.includes(status)) return res.status(400).json({ error: "Invalid status" });
 
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });
 
-    // Ensure only restaurant owning the order can update it
-    if (order.restaurantId.toString() !== req.user.id) {
+    if (order.restaurantId.toString() !== req.user.id)
       return res.status(403).json({ error: "Access denied" });
-    }
 
     order.status = status;
     await order.save();

@@ -1,3 +1,4 @@
+// src/pages/Register.js
 import React, { useState } from "react";
 import "../styles/Register.css";
 import { registerUser, registerRestaurant } from "../services/authService";
@@ -10,13 +11,15 @@ function Register() {
   const [role, setRole] = useState("user");
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setLoading(true);
 
-    let response;
     try {
+      let response;
       if (role === "user") {
         response = await registerUser({ name, email, password });
       } else {
@@ -24,16 +27,18 @@ function Register() {
       }
 
       if (response.success) {
-        setMessage("Registration successful! Redirecting to login...");
+        setMessage("✅ Registration successful! Redirecting to login...");
         setTimeout(() => {
           window.location.href = "/login";
         }, 2000);
       } else {
-        setMessage(response.error);
+        setMessage(`❌ ${response.error || "Registration failed."}`);
       }
     } catch (err) {
-      setMessage("Server error. Please try again.");
       console.error("Registration error:", err);
+      setMessage("❌ Server error. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,6 +47,7 @@ function Register() {
       <form onSubmit={handleSubmit} className="register-form">
         <h1 className="register-title">Register</h1>
 
+        {/* Name */}
         <div className="input-group">
           <label>Name</label>
           <input
@@ -53,6 +59,7 @@ function Register() {
           />
         </div>
 
+        {/* Email */}
         <div className="input-group">
           <label>Email</label>
           <input
@@ -64,6 +71,7 @@ function Register() {
           />
         </div>
 
+        {/* Password */}
         <div className="input-group">
           <label>Password</label>
           <div className="password-wrapper">
@@ -84,6 +92,7 @@ function Register() {
           </div>
         </div>
 
+        {/* Role */}
         <div className="input-group">
           <label>Role</label>
           <select value={role} onChange={(e) => setRole(e.target.value)}>
@@ -92,14 +101,21 @@ function Register() {
           </select>
         </div>
 
-        <button type="submit" className="btn-register">
-          Register
+        {/* Submit */}
+        <button type="submit" className="btn-register" disabled={loading}>
+          {loading ? "Registering..." : "Register"}
         </button>
-        <br />
-        <p>
+
+        <p className="login-link">
           Already have an account? <a href="/login">Login here</a>
         </p>
-        {message && <p className="message">{message}</p>}
+
+        {/* Message */}
+        {message && (
+          <p className={`message ${message.includes("✅") ? "success" : "error"}`}>
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );

@@ -6,22 +6,20 @@ const orderSchema = new mongoose.Schema(
     restaurantId: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant", required: true },
     items: [
       {
-        name: { type: String, required: true },
-        price: { type: Number, required: true },
-        quantity: { type: Number, default: 1 },
+        name: { type: String, required: true, trim: true },
+        price: { type: Number, required: true, min: 0 },
+        quantity: { type: Number, default: 1, min: 1 },
       },
     ],
-    total: { type: Number, required: true },
+    total: { type: Number, required: true, min: 0 },
     status: {
       type: String,
       enum: ["Pending", "Preparing", "Delivered", "Cancelled"],
       default: "Pending",
     },
-    deliveryAddress: { type: String },
+    deliveryAddress: { type: String, trim: true },
   },
   { timestamps: true }
 );
 
-const Order = mongoose.model("Order", orderSchema);
-
-export default Order;
+export default mongoose.model("Order", orderSchema);

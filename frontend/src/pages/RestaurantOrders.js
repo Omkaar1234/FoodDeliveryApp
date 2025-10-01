@@ -1,4 +1,3 @@
-// RestaurantOrders.js
 import React, { useEffect, useState } from "react";
 import "../styles/RestaurantOrders.css";
 
@@ -6,20 +5,41 @@ function RestaurantOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [error, setError] = useState("");
 
-  // Fetch restaurant orders
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
       const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("You are not logged in.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const res = await fetch("http://localhost:5000/api/orders/restaurant", {
+        const res = await fetch("http://localhost:5000/api/restaurant/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (!res.ok) {
+          const text = await res.text();
+          try {
+            const errData = JSON.parse(text);
+            setError(errData.error || "Failed to fetch orders.");
+          } catch {
+            setError("Failed to fetch orders. Invalid server response.");
+          }
+          setLoading(false);
+          return;
+        }
+
         const data = await res.json();
         setOrders(data || []);
       } catch (err) {
         console.error("Error fetching orders:", err);
+        setError("Server error. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -32,23 +52,36 @@ function RestaurantOrders() {
   const updateStatus = async (orderId, status) => {
     setUpdatingOrderId(orderId);
     const token = localStorage.getItem("token");
+
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setOrders((prev) =>
-          prev.map((order) => (order._id === orderId ? { ...order, status } : order))
-        );
-      } else {
-        alert(data.error || "Failed to update status");
+      const res = await fetch(
+        `http://localhost:5000/api/orders/${orderId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        try {
+          const errData = JSON.parse(text);
+          alert(errData.error || "Failed to update status");
+        } catch {
+          alert("Failed to update status. Invalid server response.");
+        }
+        return;
       }
+
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId ? { ...order, status } : order
+        )
+      );
     } catch (err) {
       console.error("Error updating order:", err);
       alert("Server error. Could not update status.");
@@ -58,6 +91,7 @@ function RestaurantOrders() {
   };
 
   if (loading) return <p>Loading orders...</p>;
+  if (error) return <p className="error">{error}</p>;
 
   return (
     <div className="restaurant-orders">

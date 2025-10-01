@@ -1,68 +1,63 @@
+// routes/authRoutes.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Restaurant from "../models/Restaurant.js";
+import { authMiddleware, requireRole } from "../middleware/auth.js";
 
 const router = express.Router();
-
-// ------------------- JWT Middleware -------------------
-export const authMiddleware = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "No token provided" });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { id, role }
-    next();
-  } catch (err) {
-    return res.status(401).json({ error: "Invalid token" });
-  }
-};
-
-// ------------------- Role Middleware -------------------
-export const requireRole = (role) => {
-  return (req, res, next) => {
-    if (req.user.role !== role) return res.status(403).json({ error: "Access denied" });
-    next();
-  };
-};
 
 // ------------------- Registration -------------------
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role, location, menu } = req.body;
-    if (!name || !email || !password || !role)
-      return res.status(400).json({ error: "All fields are required" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ success: false, error: "All fields are required" });
+    }
+
     let account;
 
-    if (role === "user") {
-      if (await User.findOne({ email })) return res.status(400).json({ error: "Email already exists" });
-      account = new User({ name, email, password: hashedPassword });
-      await account.save();
-    } else if (role === "restaurant") {
-      if (await Restaurant.findOne({ email })) return res.status(400).json({ error: "Email already exists" });
+    if (role.toLowerCase() === "user") {
+      if (await User.findOne({ email })) {
+        return res.status(400).json({ success: false, error: "Email already exists" });
+      }
+      account = new User({
+        name,
+        email,
+        password: await bcrypt.hash(password, 10),
+        role: "user",
+      });
+    } else if (role.toLowerCase() === "restaurant") {
+      if (await Restaurant.findOne({ email })) {
+        return res.status(400).json({ success: false, error: "Email already exists" });
+      }
       account = new Restaurant({
         name,
         email,
-        password: hashedPassword,
-        location: location || "",
+        password: await bcrypt.hash(password, 10),
+        role: "restaurant",
+        address: location || "",
         menu: Array.isArray(menu) ? menu : [],
       });
-      await account.save();
     } else {
-      return res.status(400).json({ error: "Invalid role" });
+      return res.status(400).json({ success: false, error: "Invalid role. Allowed: user or restaurant" });
     }
 
+    await account.save();
+
     res.status(201).json({
-      message: `${role.charAt(0).toUpperCase() + role.slice(1)} registered successfully`,
-      account: { id: account._id, name: account.name, email: account.email, role },
+      success: true,
+      message: `${account.role} registered successfully`,
+      id: account._id,
+      name: account.name,
+      email: account.email,
+      role: account.role,
     });
   } catch (err) {
     console.error("POST /register error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ success: false, error: "Server error" });
   }
 });
 
@@ -70,8 +65,12 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
 
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: "Email and password are required" });
+    }
+
+    // Try User first, then Restaurant
     let account = await User.findOne({ email });
     let role = "user";
 
@@ -80,17 +79,25 @@ router.post("/login", async (req, res) => {
       role = "restaurant";
     }
 
-    if (!account) return res.status(400).json({ error: "Account not found" });
+    if (!account) return res.status(400).json({ success: false, error: "Account not found" });
 
     const isMatch = await bcrypt.compare(password, account.password);
-    if (!isMatch) return res.status(400).json({ error: "Invalid password" });
+    if (!isMatch) return res.status(400).json({ success: false, error: "Invalid password" });
 
-    const token = jwt.sign({ id: account._id, role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    role = account.role; // trust DB role
 
-    res.json({ message: "Login successful", role, token });
+    const token = jwt.sign({ id: account._id, role }, process.env.JWT_SECRET, { expiresIn: "2h" });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      role,
+      accountId: account._id,
+    });
   } catch (err) {
     console.error("POST /login error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ success: false, error: "Server error" });
   }
 });
 
@@ -99,40 +106,59 @@ router.get("/profile", authMiddleware, async (req, res) => {
   try {
     const Model = req.user.role === "user" ? User : Restaurant;
     const account = await Model.findById(req.user.id).select("-password");
-    if (!account) return res.status(404).json({ error: "Account not found" });
 
-    res.json({ profile: account });
+    if (!account) return res.status(404).json({ success: false, error: "Account not found" });
+
+    // ✅ Flatten response so frontend can directly access name/email/_id
+    res.json({
+      success: true,
+      _id: account._id,
+      name: account.name,
+      email: account.email,
+      role: account.role,
+      address: account.address || "",
+      menu: account.menu || [],
+    });
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    console.error("GET /profile error:", err);
+    res.status(500).json({ success: false, error: "Server error" });
   }
 });
 
+// ------------------- Update Profile -------------------
 router.put("/profile", authMiddleware, async (req, res) => {
   try {
     const Model = req.user.role === "user" ? User : Restaurant;
-    const { name, phone, address, bio, location, menu } = req.body;
+    const updated = await Model.findByIdAndUpdate(req.user.id, req.body, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
 
-    const updated = await Model.findByIdAndUpdate(
-      req.user.id,
-      { name, phone, address, bio, location, menu },
-      { new: true }
-    ).select("-password");
+    if (!updated) return res.status(404).json({ success: false, error: "Account not found" });
 
-    if (!updated) return res.status(404).json({ error: "Account not found" });
-
-    res.json({ message: "Profile updated successfully", profile: updated });
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      _id: updated._id,
+      name: updated.name,
+      email: updated.email,
+      role: updated.role,
+      address: updated.address || "",
+      menu: updated.menu || [],
+    });
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    console.error("PUT /profile error:", err);
+    res.status(500).json({ success: false, error: "Server error" });
   }
 });
 
 // ------------------- Dashboards -------------------
 router.get("/dashboard/user", authMiddleware, requireRole("user"), (req, res) => {
-  res.json({ message: "Welcome to the User Dashboard", userId: req.user.id });
+  res.json({ success: true, message: "Welcome to the User Dashboard", userId: req.user.id });
 });
 
 router.get("/dashboard/restaurant", authMiddleware, requireRole("restaurant"), (req, res) => {
-  res.json({ message: "Welcome to the Restaurant Dashboard", restaurantId: req.user.id });
+  res.json({ success: true, message: "Welcome to the Restaurant Dashboard", restaurantId: req.user.id });
 });
 
 export default router;

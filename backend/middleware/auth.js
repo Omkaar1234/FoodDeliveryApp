@@ -1,23 +1,45 @@
 import jwt from "jsonwebtoken";
 
-// JWT Middleware
+// ------------------- Auth Middleware -------------------
+// Verifies JWT and attaches user info to req.user
 export const authMiddleware = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "No token provided" });
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ success: false, error: "Authorization token missing" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: "Token not provided" });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role ? decoded.role.toLowerCase() : null, // normalize role
+    };
+
     next();
   } catch (err) {
-    return res.status(401).json({ error: "Invalid token" });
+    console.error("Invalid or expired token:", err);
+    return res.status(401).json({ success: false, error: "Invalid or expired token" });
   }
 };
 
-// Role Middleware
-export const requireRole = (role) => {
-  return (req, res, next) => {
-    if (req.user.role !== role) return res.status(403).json({ error: "Access denied" });
-    next();
-  };
+// ------------------- Role Middleware -------------------
+// Ensures the user has the required role
+export const requireRole = (requiredRole) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, error: "User not authenticated" });
+  }
+
+  if (!req.user.role || req.user.role.toLowerCase() !== requiredRole.toLowerCase()) {
+    return res.status(403).json({ success: false, error: "Access denied: insufficient permissions" });
+  }
+
+  next();
 };

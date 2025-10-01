@@ -4,62 +4,52 @@ import { authMiddleware, requireRole } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// GET all restaurants (public)
+// ✅ Get list of all restaurants (public, for users)
 router.get("/", async (req, res) => {
   try {
-    const restaurants = await Restaurant.find().select("-password -__v");
+    const restaurants = await Restaurant.find().select("-password");
     res.json(restaurants);
   } catch (err) {
-    console.error(err);
+    console.error("GET /restaurants error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// GET single restaurant (public)
-router.get("/:id", async (req, res) => {
+// ✅ Get restaurant profile + menu (restaurant only)
+router.get("/me", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
-    const restaurant = await Restaurant.findById(req.params.id).select("-password -__v");
+    const restaurant = await Restaurant.findById(req.user.id).select("-password");
     if (!restaurant) return res.status(404).json({ error: "Restaurant not found" });
     res.json(restaurant);
   } catch (err) {
-    console.error(err);
+    console.error("GET /me error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// UPDATE restaurant profile
-router.put("/:id", authMiddleware, requireRole("restaurant"), async (req, res) => {
+// ✅ Update restaurant profile
+router.put("/me", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
-    if (req.user.id !== req.params.id)
-      return res.status(403).json({ error: "Unauthorized" });
+    const updated = await Restaurant.findByIdAndUpdate(req.user.id, req.body, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
 
-    const updatedRestaurant = await Restaurant.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    ).select("-password -__v");
-
-    if (!updatedRestaurant) return res.status(404).json({ error: "Restaurant not found" });
-
-    res.json({ message: "Restaurant updated successfully", restaurant: updatedRestaurant });
+    if (!updated) return res.status(404).json({ error: "Restaurant not found" });
+    res.json(updated);
   } catch (err) {
-    console.error(err);
+    console.error("PUT /me error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// ADD menu item
-router.post("/:id/menu", authMiddleware, requireRole("restaurant"), async (req, res) => {
+// ✅ Add menu item
+router.post("/me/menu", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
-    if (req.user.id !== req.params.id)
-      return res.status(403).json({ error: "Unauthorized" });
-
     const { name, price } = req.body;
-    if (!name || price === undefined || isNaN(price)) {
-      return res.status(400).json({ error: "Valid name and price are required" });
-    }
+    if (!name || price === undefined) return res.status(400).json({ error: "Name & price required" });
 
-    const restaurant = await Restaurant.findById(req.params.id);
+    const restaurant = await Restaurant.findById(req.user.id);
     if (!restaurant) return res.status(404).json({ error: "Restaurant not found" });
 
     const newItem = { name, price };
@@ -68,57 +58,58 @@ router.post("/:id/menu", authMiddleware, requireRole("restaurant"), async (req, 
 
     res.status(201).json(restaurant.menu[restaurant.menu.length - 1]);
   } catch (err) {
-    console.error(err);
+    console.error("POST /me/menu error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// UPDATE menu item
-router.put("/:id/menu/:itemId", authMiddleware, requireRole("restaurant"), async (req, res) => {
+// ✅ Update menu item
+router.put("/me/menu/:itemId", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
-    if (req.user.id !== req.params.id)
-      return res.status(403).json({ error: "Unauthorized" });
-
-    const { name, price } = req.body;
-    if (!name || price === undefined || isNaN(price)) {
-      return res.status(400).json({ error: "Valid name and price are required" });
-    }
-
-    const restaurant = await Restaurant.findById(req.params.id);
+    const restaurant = await Restaurant.findById(req.user.id);
     if (!restaurant) return res.status(404).json({ error: "Restaurant not found" });
 
-    const menuItem = restaurant.menu.id(req.params.itemId);
-    if (!menuItem) return res.status(404).json({ error: "Menu item not found" });
+    const item = restaurant.menu.id(req.params.itemId);
+    if (!item) return res.status(404).json({ error: "Menu item not found" });
 
-    menuItem.name = name;
-    menuItem.price = price;
-
+    item.name = req.body.name || item.name;
+    item.price = req.body.price !== undefined ? req.body.price : item.price;
     await restaurant.save();
-    res.json(menuItem);
+
+    res.json(item);
   } catch (err) {
-    console.error(err);
+    console.error("PUT /me/menu/:itemId error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// DELETE menu item
-router.delete("/:id/menu/:itemId", authMiddleware, requireRole("restaurant"), async (req, res) => {
+// ✅ Delete menu item
+router.delete("/me/menu/:itemId", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
-    if (req.user.id !== req.params.id)
-      return res.status(403).json({ error: "Unauthorized" });
-
-    const restaurant = await Restaurant.findById(req.params.id);
+    const restaurant = await Restaurant.findById(req.user.id);
     if (!restaurant) return res.status(404).json({ error: "Restaurant not found" });
 
-    const menuItem = restaurant.menu.id(req.params.itemId);
-    if (!menuItem) return res.status(404).json({ error: "Menu item not found" });
+    const item = restaurant.menu.id(req.params.itemId);
+    if (!item) return res.status(404).json({ error: "Menu item not found" });
 
-    menuItem.remove();
+    item.remove();
     await restaurant.save();
 
-    res.json({ message: "Menu item deleted successfully", menu: restaurant.menu });
+    res.json({ message: "Item deleted", id: req.params.itemId });
   } catch (err) {
-    console.error(err);
+    console.error("DELETE /me/menu/:itemId error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get single restaurant by ID (for menu view)
+router.get("/:id", async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findById(req.params.id).select("-password");
+    if (!restaurant) return res.status(404).json({ error: "Restaurant not found" });
+    res.json(restaurant);  // includes menu
+  } catch (err) {
+    console.error("GET /restaurants/:id error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

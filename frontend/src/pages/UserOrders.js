@@ -1,4 +1,3 @@
-// UserOrders.js
 import React, { useEffect, useState } from "react";
 import "../styles/UserOrders.css";
 
@@ -22,8 +21,13 @@ function UserOrders() {
         });
 
         if (!res.ok) {
-          const errData = await res.json();
-          setError(errData.error || "Failed to fetch orders.");
+          const text = await res.text(); // first get raw response
+          try {
+            const errData = JSON.parse(text);
+            setError(errData.error || "Failed to fetch orders.");
+          } catch {
+            setError("Failed to fetch orders. Invalid server response.");
+          }
           setLoading(false);
           return;
         }
@@ -64,7 +68,12 @@ function UserOrders() {
                 ))}
               </ul>
               <p><strong>Total:</strong> ${order.total}</p>
-              <p><strong>Status:</strong> <span className={`status ${order.status.toLowerCase()}`}>{order.status}</span></p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className={`status ${order.status.toLowerCase()}`}>
+                  {order.status}
+                </span>
+              </p>
             </div>
           ))}
         </div>

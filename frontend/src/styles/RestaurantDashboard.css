@@ -1,185 +1,175 @@
-/* Layout */
+/* RestaurantDashboard.css */
+
+/* ---------- GLOBAL RESET ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #f4f7fc;
+  color: #333;
+}
+
+/* ---------- LAYOUT ---------- */
 .restaurant-dashboard {
   display: flex;
-  height: 100vh;
-  font-family: Arial, sans-serif;
+  min-height: 100vh;
 }
 
-/* Sidebar */
+/* ---------- SIDEBAR ---------- */
 .sidebar {
   width: 220px;
-  background-color: #222;
+  background-color: #1f2937; /* dark gray */
   color: #fff;
-  padding: 1.5rem;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: start;
+  gap: 30px;
 }
 
-.dashboard-title {
-  font-size: 20px;
-  margin-bottom: 2rem;
+.sidebar h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ffdd57;
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 0;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .sidebar ul li {
-  position: relative; /* needed for notification dot */
-  padding: 10px;
-  margin: 8px 0;
+  padding: 12px 20px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
 }
 
-.sidebar ul li:hover,
+.sidebar ul li:hover {
+  background-color: #374151;
+}
+
 .sidebar ul li.active {
-  background: #ff5a5f;
-  color: #fff;
+  background-color: #ffdd57;
+  color: #1f2937;
+  font-weight: 600;
 }
 
-/* Notification Dot */
-.sidebar ul li .notification-dot {
-  position: absolute;
-  top: 50%;
-  right: 15px;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  background: yellow;
-  border-radius: 50%;
-}
-
-.sidebar ul li .notification-dot.pulse {
-  animation: pulse 1.2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: translateY(-50%) scale(1); opacity: 1; }
-  50% { transform: translateY(-50%) scale(1.4); opacity: 0.7; }
-  100% { transform: translateY(-50%) scale(1); opacity: 1; }
-}
-
-/* Main content */
+/* ---------- MAIN CONTENT ---------- */
 .main-content {
   flex: 1;
-  padding: 2rem;
-  background: #f8f9fa;
+  padding: 40px;
   overflow-y: auto;
 }
 
-/* Orders */
-.order-card {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.main-content h2 {
+  margin-bottom: 20px;
+  color: #1f2937;
+  font-size: 1.8rem;
 }
 
-.status {
-  font-weight: bold;
+/* ---------- CARDS ---------- */
+.order-card, .menu-item-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
 }
 
-.status.pending { color: orange; }
-.status.preparing { color: #007bff; }
-.status.delivered { color: green; }
-.status.cancelled { color: red; }
+.order-card:hover, .menu-item-card:hover {
+  transform: translateY(-3px);
+}
 
-/* Buttons */
-.btn {
-  padding: 6px 12px;
+/* ---------- BUTTONS ---------- */
+button {
+  padding: 8px 15px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  margin: 4px 4px 0 0;
+  margin-right: 10px;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.btn:hover {
+button:hover {
   opacity: 0.9;
 }
 
-.update-btn { background: #007bff; color: #fff; }
-.add-btn { background: #28a745; color: #fff; }
-.edit-btn { background: #ffc107; color: #000; }
-.delete-btn { background: #dc3545; color: #fff; }
-.upload-btn { background: #17a2b8; color: #fff; }
-.save-btn { background: #ff5a5f; color: #fff; }
-
-/* Menu Section */
-.menu-section .add-menu-item {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 1rem;
+/* Different button colors */
+button:contains("Add Item") {
+  background-color: #10b981;
+  color: #fff;
 }
 
-.menu-section input {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+button:contains("Save") {
+  background-color: #3b82f6;
+  color: #fff;
 }
 
-.menu-item {
-  background: #fff;
-  padding: 0.8rem;
-  margin: 0.5rem 0;
-  border-radius: 10px;
+button:contains("Cancel") {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+button:contains("Edit") {
+  background-color: #f59e0b;
+  color: #fff;
+}
+
+button:contains("Delete") {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+button:contains("Mark") {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+/* ---------- FORM INPUTS ---------- */
+input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  margin-right: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 5px rgba(59,130,246,0.3);
+}
+
+/* ---------- MENU FORM ---------- */
+.menu-form {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   flex-wrap: wrap;
+  margin-bottom: 20px;
+  gap: 10px;
 }
 
-.menu-item input {
-  width: 120px;
-  margin-right: 8px;
-}
-
-/* Profile */
-.profile-card {
-  margin-bottom: 1rem;
-}
-
-.restaurant-photo {
-  width: 250px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 12px;
+/* ---------- ANALYTICS ---------- */
+.main-content p {
+  font-size: 1rem;
   margin-bottom: 10px;
 }
 
-.profile-form input {
-  display: block;
-  width: 60%;
-  margin: 0.5rem 0;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.main-content p strong {
+  color: #1f2937;
 }
 
-/* Analytics */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.stat-card {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 900px) {
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
   .restaurant-dashboard {
     flex-direction: column;
   }
@@ -188,24 +178,26 @@
     width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    padding: 15px;
+    gap: 10px;
   }
 
   .sidebar ul {
-    display: flex;
     flex-direction: row;
     gap: 10px;
   }
 
   .main-content {
-    padding: 1rem;
+    padding: 20px;
   }
+}
 
-  .menu-section .add-menu-item {
+@media (max-width: 640px) {
+  .menu-form {
     flex-direction: column;
   }
 
-  .menu-item {
-    flex-direction: column;
-    align-items: flex-start;
+  button {
+    margin-top: 10px;
   }
 }

@@ -1,4 +1,3 @@
-// pages/Login.js
 import React, { useState } from "react";
 import "../styles/Login.css";
 import { loginUser } from "../services/authService";
@@ -16,20 +15,29 @@ function Login() {
     e.preventDefault();
     setMessage("");
 
-    const response = await loginUser(email, password);
+    try {
+      const response = await loginUser(email, password);
 
-    if (response.success && response.token) {
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("role", response.role);
+      if (response.success) {
+        // Save token and role to localStorage
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("role", response.role);
+        localStorage.setItem("accountId", response.accountId);
 
-      // Redirect based on role
-      if (response.role === "restaurant") {
-        navigate("/restaurant/dashboard");
+        // Navigate based on role
+        if (response.role === "restaurant") {
+          navigate("/restaurant/dashboard");
+        } else if (response.role === "user") {
+          navigate("/user/dashboard");
+        } else {
+          setMessage("Invalid role. Please contact support.");
+        }
       } else {
-        navigate("/user/dashboard");
+        setMessage(response.error || "Login failed. Check your credentials.");
       }
-    } else {
-      setMessage(response.error || "Invalid credentials");
+    } catch (error) {
+      console.error("Login error:", error);
+      setMessage("Server error. Please try again later.");
     }
   };
 
@@ -73,7 +81,7 @@ function Login() {
           Don’t have an account? <a href="/register">Register here</a>
         </p>
 
-        <button type="submit" className="btn-login" >
+        <button type="submit" className="btn-login">
           Login
         </button>
 
@@ -84,5 +92,3 @@ function Login() {
 }
 
 export default Login;
-
-

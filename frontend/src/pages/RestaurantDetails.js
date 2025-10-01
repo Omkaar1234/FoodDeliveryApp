@@ -1,24 +1,48 @@
-// RestaurantDetails.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../styles/RestaurantDetails.css";
 
+// 🔑 Simple fetch wrapper (no auth needed for public restaurant menu)
+const fetchJSON = async (url) => {
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch");
+  return data;
+};
+
+// Auth fetch for placing order
+const authFetch = async (url, options = {}) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found. Please login.");
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data;
+};
+
 function RestaurantDetails() {
-  const { id } = useParams(); // restaurant id from URL
+  const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [placingOrder, setPlacingOrder] = useState(false);
 
-  // Fetch restaurant details
   useEffect(() => {
     const fetchRestaurant = async () => {
+      setLoading(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/restaurants/${id}`);
-        const data = await res.json();
+        const data = await fetchJSON(`${process.env.REACT_APP_API_URL}/restaurants/${id}`);
         setRestaurant(data);
       } catch (err) {
-        console.error("Failed to fetch restaurant:", err);
+        console.error(err);
+        alert(err.message);
       } finally {
         setLoading(false);
       }
@@ -26,57 +50,36 @@ function RestaurantDetails() {
     fetchRestaurant();
   }, [id]);
 
-  // Add item to cart
   const addToCart = (item) => {
     const exists = cart.find((i) => i._id === item._id);
     if (exists) {
-      setCart(cart.map((i) =>
-        i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
-      ));
+      setCart(cart.map((i) => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i));
     } else {
       setCart([...cart, { ...item, quantity: 1 }]);
     }
   };
 
-  // Remove item from cart
-  const removeFromCart = (itemId) => {
-    setCart(cart.filter((i) => i._id !== itemId));
-  };
+  const removeFromCart = (itemId) => setCart(cart.filter((i) => i._id !== itemId));
 
-  // Calculate total price
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Place order
   const placeOrder = async () => {
     if (cart.length === 0) return alert("Cart is empty!");
-
-    const token = localStorage.getItem("token");
     setPlacingOrder(true);
-
     try {
-      const res = await fetch("http://localhost:5000/api/orders", {
+      await authFetch(`${process.env.REACT_APP_API_URL}/orders`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           restaurantId: id,
-          items: cart.map(({ _id, quantity }) => ({ itemId: _id, quantity })),
+          items: cart.map(({ name, price, quantity }) => ({ name, price, quantity })),
           total: totalPrice,
         }),
       });
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Order placed successfully!");
-        setCart([]);
-      } else {
-        alert(data.error || "Failed to place order.");
-      }
+      alert("Order placed successfully!");
+      setCart([]);
     } catch (err) {
       console.error(err);
-      alert("Server error. Please try again later.");
+      alert(err.message);
     } finally {
       setPlacingOrder(false);
     }
@@ -95,11 +98,11 @@ function RestaurantDetails() {
 
       <h3>Menu</h3>
       <div className="menu-list">
-        {restaurant.menu && restaurant.menu.length > 0 ? (
+        {restaurant.menu?.length > 0 ? (
           restaurant.menu.map((item) => (
             <div key={item._id} className="menu-item">
               <p>{item.name}</p>
-              <p>${item.price}</p>
+              <p>₹{item.price}</p>
               <button onClick={() => addToCart(item)}>Add to Cart</button>
             </div>
           ))
@@ -114,16 +117,12 @@ function RestaurantDetails() {
           {cart.map((item) => (
             <div key={item._id} className="cart-item">
               <p>{item.name} x {item.quantity}</p>
-              <p>${item.price * item.quantity}</p>
+              <p>₹{item.price * item.quantity}</p>
               <button onClick={() => removeFromCart(item._id)}>Remove</button>
             </div>
           ))}
-          <p><strong>Total: ${totalPrice}</strong></p>
-          <button
-            onClick={placeOrder}
-            className="place-order-btn"
-            disabled={placingOrder}
-          >
+          <p><strong>Total: ₹{totalPrice}</strong></p>
+          <button onClick={placeOrder} disabled={placingOrder}>
             {placingOrder ? "Placing Order..." : "Place Order"}
           </button>
         </div>
