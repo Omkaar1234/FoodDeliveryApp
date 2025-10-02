@@ -49,7 +49,7 @@ const RestaurantDashboard = () => {
   useEffect(() => {
     fetchRestaurantData();
     // Optional polling every 30 seconds for orders
-    const interval = setInterval(fetchRestaurantData, 300000);
+    const interval = setInterval(fetchRestaurantData, 30000);
     return () => clearInterval(interval);
   }, [fetchRestaurantData]);
 
