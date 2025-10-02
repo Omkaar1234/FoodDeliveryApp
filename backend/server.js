@@ -19,7 +19,7 @@ const app = express();
 // ------------------- MIDDLEWARES -------------------
 // CORS setup for frontend (React dev server)
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  origin: "https://fooooddeliveryapp.netlify.app",
   credentials: true,
 }));
 
