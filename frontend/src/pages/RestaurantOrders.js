@@ -1,3 +1,4 @@
+// src/pages/RestaurantOrders.js
 import React, { useEffect, useState } from "react";
 import "../styles/RestaurantOrders.css";
 
@@ -7,53 +8,64 @@ function RestaurantOrders() {
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      const token = localStorage.getItem("token");
+  const statusOptions = [
+    "Pending",
+    "Accepted",
+    "Preparing",
+    "Out for Delivery",
+    "Delivered",
+    "Cancelled",
+  ];
 
-      if (!token) {
-        setError("You are not logged in.");
+  // ✅ Fetch orders
+  const fetchOrders = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("You are not logged in.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/orders/restaurant", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        try {
+          const errData = JSON.parse(text);
+          setError(errData.error || "Failed to fetch orders.");
+        } catch {
+          setError("Failed to fetch orders. Invalid server response.");
+        }
         setLoading(false);
         return;
       }
 
-      try {
-        const res = await fetch("http://localhost:5000/api/restaurant/orders", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const data = await res.json();
+      setOrders(data || []);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!res.ok) {
-          const text = await res.text();
-          try {
-            const errData = JSON.parse(text);
-            setError(errData.error || "Failed to fetch orders.");
-          } catch {
-            setError("Failed to fetch orders. Invalid server response.");
-          }
-          setLoading(false);
-          return;
-        }
-
-        const data = await res.json();
-        setOrders(data || []);
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError("Server error. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchOrders();
+    const interval = setInterval(fetchOrders, 15000); // auto-refresh every 15s
+    return () => clearInterval(interval);
   }, []);
 
-  // Update order status
-  const updateStatus = async (orderId, status) => {
-    setUpdatingOrderId(orderId);
-    const token = localStorage.getItem("token");
-
+  // ✅ Update order status
+  const updateOrderStatus = async (orderId, status) => {
     try {
+      setUpdatingOrderId(orderId);
+      const token = localStorage.getItem("token");
+
       const res = await fetch(
         `http://localhost:5000/api/orders/${orderId}/status`,
         {
@@ -66,25 +78,14 @@ function RestaurantOrders() {
         }
       );
 
-      if (!res.ok) {
-        const text = await res.text();
-        try {
-          const errData = JSON.parse(text);
-          alert(errData.error || "Failed to update status");
-        } catch {
-          alert("Failed to update status. Invalid server response.");
-        }
-        return;
-      }
+      const data = await res.json(); // backend always returns JSON
+      if (!res.ok) throw new Error(data.error || "Failed to update status");
 
-      setOrders((prev) =>
-        prev.map((order) =>
-          order._id === orderId ? { ...order, status } : order
-        )
-      );
+      alert(data.message || `Order status updated to ${status}`);
+      fetchOrders(); // refresh orders after update
     } catch (err) {
       console.error("Error updating order:", err);
-      alert("Server error. Could not update status.");
+      alert(err.message);
     } finally {
       setUpdatingOrderId(null);
     }
@@ -102,9 +103,16 @@ function RestaurantOrders() {
         <div className="order-list">
           {orders.map((order) => (
             <div key={order._id} className="order-card">
-              <p><strong>Order ID:</strong> {order._id}</p>
-              <p><strong>User ID:</strong> {order.userId}</p>
-              <p><strong>Items:</strong></p>
+              <p>
+                <strong>Order ID:</strong> {order._id}
+              </p>
+              <p>
+                <strong>User:</strong>{" "}
+                {order.userId?.name || "Unknown"} ({order.userId?.email || ""})
+              </p>
+              <p>
+                <strong>Items:</strong>
+              </p>
               <ul>
                 {order.items.map((item, idx) => (
                   <li key={idx}>
@@ -112,18 +120,36 @@ function RestaurantOrders() {
                   </li>
                 ))}
               </ul>
-              <p><strong>Total:</strong> ${order.total}</p>
-              <p><strong>Status:</strong> {order.status}</p>
+              <p>
+                <strong>Total:</strong> ${order.total}
+              </p>
+              <p>
+                <strong>Status:</strong> {order.status}
+              </p>
+
               <div className="status-buttons">
-                {["Pending", "Preparing", "Delivered", "Cancelled"].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => updateStatus(order._id, s)}
-                    disabled={order.status === s || updatingOrderId === order._id}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {statusOptions.map((s) => {
+                  // ✅ allowed transitions
+                  const allowedNext = {
+                    Pending: ["Accepted", "Cancelled"],
+                    Accepted: ["Preparing", "Cancelled"],
+                    Preparing: ["Out for Delivery"],
+                    "Out for Delivery": ["Delivered"],
+                    Delivered: [],
+                    Cancelled: [],
+                  };
+                  const allowed = allowedNext[order.status]?.includes(s);
+
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => updateOrderStatus(order._id, s)}
+                      disabled={!allowed || updatingOrderId === order._id}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}

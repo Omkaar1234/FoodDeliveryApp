@@ -1,5 +1,5 @@
 // src/services/authService.js
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL;
 
 // ---------------- Helper ----------------
 const parseJSON = async (res) => {
@@ -115,29 +115,25 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
 // ---------------- GET PROFILE ----------------
 export const getProfile = async () => {
   try {
-    const role = localStorage.getItem("role");
-    const url = role === "restaurant" ? "/restaurants/me" : "/auth/profile";
-    const data = await authFetch(url);
+    // ✅ Backend provides one endpoint: /api/profile
+    const data = await authFetch("/profile");
 
-    // Ensure we return the actual profile object
-    if (data.success && data.profile) {
-      return data.profile;
+    if (!data.success) {
+      return { success: false, error: data.error || "Failed to fetch profile" };
     }
 
-    return { success: false, error: data.error || "Failed to fetch profile" };
+    return data; // returns { success: true, _id, name, email, role }
   } catch (err) {
     console.error("Get profile error:", err);
     return { success: false, error: err.message || "Server error" };
   }
 };
 
-
 // ---------------- UPDATE PROFILE ----------------
 export const updateProfile = async (profileData) => {
   try {
-    const role = localStorage.getItem("role");
-    const url = role === "restaurant" ? "/restaurants/me" : "/auth/profile";
-    return await authFetch(url, { method: "PUT", body: profileData });
+    // ✅ Same endpoint for both roles
+    return await authFetch("/profile", { method: "PUT", body: profileData });
   } catch (err) {
     console.error("Update profile error:", err);
     return { success: false, error: err.message || "Server error" };

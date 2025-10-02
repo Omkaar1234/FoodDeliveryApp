@@ -30,10 +30,18 @@ router.get("/me", authMiddleware, requireRole("restaurant"), async (req, res) =>
 // ✅ Update restaurant profile
 router.put("/me", authMiddleware, requireRole("restaurant"), async (req, res) => {
   try {
-    const updated = await Restaurant.findByIdAndUpdate(req.user.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
+    const updated = await Restaurant.findByIdAndUpdate(
+      req.user.id,
+      {
+        name: req.body.name,
+        address: req.body.address,
+        contact: req.body.contact, // explicitly include contact
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("-password");
 
     if (!updated) return res.status(404).json({ error: "Restaurant not found" });
     res.json(updated);

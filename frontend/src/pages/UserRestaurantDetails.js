@@ -1,3 +1,4 @@
+// src/pages/UserRestaurantDetails.js
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useParams } from "react-router-dom";
 import "../styles/UserRestaurantDetails.css";
@@ -22,7 +23,7 @@ const UserRestaurantDetails = () => {
     try {
       const data = await authFetch(`/restaurants/${id}`);
       setRestaurant(data || {});
-      setMenu((data?.menu) || []);
+      setMenu(data?.menu || []);
     } catch (err) {
       console.error("Failed to fetch restaurant:", err);
       setError(err.message || "Server error. Could not fetch restaurant details.");
@@ -33,14 +34,14 @@ const UserRestaurantDetails = () => {
 
   useEffect(() => {
     fetchRestaurantData();
-    const interval = setInterval(fetchRestaurantData, 15000); // refresh menu every 15s
+    const interval = setInterval(fetchRestaurantData, 60000); // refresh menu every 15s
     return () => clearInterval(interval);
   }, [fetchRestaurantData]);
 
   // ---------------- Cart Handlers ----------------
   const handleAddToCart = (item) => {
     addToCart({
-      itemId: item._id,
+      _id: item._id, // ✅ keep consistent with CartContext
       name: item.name,
       price: item.price,
       quantity: 1,
@@ -53,7 +54,7 @@ const UserRestaurantDetails = () => {
 
   const handleChangeQuantity = (itemId, delta) => {
     const cartItem = cartItems.find(
-      (c) => c.itemId === itemId && c.restaurantId === restaurant._id
+      (c) => c._id === itemId && c.restaurantId === restaurant._id
     );
     if (!cartItem) return;
     const newQuantity = Math.max(cartItem.quantity + delta, 1);
@@ -94,7 +95,7 @@ const UserRestaurantDetails = () => {
       alert("Order placed successfully!");
       // remove ordered items from cart
       itemsFromThisRestaurant.forEach((item) =>
-        removeFromCart(item.itemId, restaurant._id)
+        removeFromCart(item._id, restaurant._id)
       );
     } catch (err) {
       console.error(err);
@@ -102,7 +103,7 @@ const UserRestaurantDetails = () => {
     }
   };
 
-  if (loading) return <p>Loading restaurant details...</p>;
+  if (loading) return <p className="loading">Loading restaurant details...</p>;
   if (error) return <p className="error">{error}</p>;
 
   const cartFromThisRestaurant = cartItems.filter(
@@ -111,59 +112,102 @@ const UserRestaurantDetails = () => {
 
   return (
     <div className="restaurant-details">
-      <h2>{restaurant.name || "Restaurant"}</h2>
-      <p>{restaurant.address || "Address not available"}</p>
-      <p>Contact: {restaurant.contact || "N/A"}</p>
-
-      {/* ---------------- Menu ---------------- */}
-      <h3>🍴 Menu</h3>
-      <div className="menu-list">
-        {menu.length > 0 ? (
-          menu.map((item) => (
-            <div key={item._id} className="menu-card">
-              <p>
-                <strong>{item.name}</strong> - ₹{item.price}
-              </p>
-              <button className="btn add-btn" onClick={() => handleAddToCart(item)}>
-                Add to Cart
-              </button>
-            </div>
-          ))
-        ) : (
-          <p>No menu items available.</p>
-        )}
+      {/* Restaurant Header - Horizontal Layout */}
+      <div className="restaurant-header">
+        <div className="restaurant-name">
+          <h2>{restaurant.name || "Restaurant"}</h2>
+        </div>
+        <div className="restaurant-info-row">
+          <div className="info-item">
+            <span className="info-label">Address:</span>
+            <span>{restaurant.address || "Address not available"}</span>
+          </div>
+          <div className="info-item">
+            <span className="info-label">Contact:</span>
+            <span>{restaurant.contact || "N/A"}</span>
+          </div>
+        </div>
       </div>
 
-      {/* ---------------- Cart ---------------- */}
-      <h3>🛒 Cart</h3>
-      {cartFromThisRestaurant.length > 0 ? (
-        <div className="cart-list">
-          {cartFromThisRestaurant.map((item) => (
-            <div key={item.itemId} className="cart-item">
-              <p>
-                {item.name} x {item.quantity} - ₹{item.price * item.quantity}
-              </p>
-              <div className="cart-actions">
-                <button onClick={() => handleChangeQuantity(item.itemId, 1)}>+</button>
-                <button onClick={() => handleChangeQuantity(item.itemId, -1)}>-</button>
-                <button className="btn delete-btn" onClick={() => handleRemoveFromCart(item.itemId)}>Remove</button>
+      {/* ---------------- Menu ---------------- */}
+      <section className="menu-section">
+        <h3 className="section-title">🍴 Menu</h3>
+        <div className="menu-list">
+          {menu.length > 0 ? (
+            menu.map((item, index) => (
+              <div key={item._id} className="menu-item" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="item-details">
+                  <strong className="item-name">{item.name}</strong>
+                  <span className="item-price">₹{item.price}</span>
+                </div>
+                <button
+                  className="btn add-btn"
+                  onClick={() => handleAddToCart(item)}
+                >
+                  Add +
+                </button>
               </div>
-            </div>
-          ))}
-          <p>
-            <strong>
-              Total: ₹
-              {cartFromThisRestaurant.reduce((sum, item) => sum + item.price * item.quantity, 0)}
-            </strong>
-          </p>
-          <button className="btn checkout-btn" onClick={placeOrder}>Place Order</button>
+            ))
+          ) : (
+            <p className="no-items">No menu items available.</p>
+          )}
         </div>
-      ) : (
-        <p>Cart is empty.</p>
-      )}
+      </section>
+
+      {/* ---------------- Cart ---------------- */}
+      <section className="cart-section">
+        <h3 className="section-title">🛒 Cart</h3>
+        {cartFromThisRestaurant.length > 0 ? (
+          <div className="cart-list">
+            {cartFromThisRestaurant.map((item, index) => (
+              <div key={item._id} className="cart-item" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="item-details">
+                  <span className="item-name">{item.name}</span>
+                  <span className="quantity">x {item.quantity}</span>
+                  <span className="item-price">₹{item.price * item.quantity}</span>
+                </div>
+                <div className="cart-actions">
+                  <button 
+                    className="qty-btn" 
+                    onClick={() => handleChangeQuantity(item._id, 1)}
+                  >
+                    +
+                  </button>
+                  <button 
+                    className="qty-btn" 
+                    onClick={() => handleChangeQuantity(item._id, -1)}
+                  >
+                    -
+                  </button>
+                  <button
+                    className="btn delete-btn"
+                    onClick={() => handleRemoveFromCart(item._id)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="cart-total">
+              <strong>
+                Total: ₹
+                {cartFromThisRestaurant.reduce(
+                  (sum, item) => sum + item.price * item.quantity,
+                  0
+                )}
+              </strong>
+            </div>
+            <button className="btn checkout-btn" onClick={placeOrder}>
+              Place Order
+            </button>
+          </div>
+        ) : (
+          <p className="no-items">Cart is empty.</p>
+        )}
+      </section>
 
       {/* Popup */}
-      {showAddedPopup && <div className="added-popup">Item added to cart!</div>}
+      {showAddedPopup && <div className="added-popup">Item added to cart! 🎉</div>}
     </div>
   );
 };

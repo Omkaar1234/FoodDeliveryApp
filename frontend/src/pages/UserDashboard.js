@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import "../styles/UserDashboard.css";
 import { FaShoppingCart, FaUserCircle, FaSearch } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import logo from "../styles/assets/icon.png";
 import { getProfile, fetchAllRestaurants } from "../services/authService";
-import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 
 function UserDashboard() {
@@ -111,13 +110,22 @@ function UserDashboard() {
         </div>
 
         <div className="navbar-right">
+          {/* Cart Icon */}
           <div className="cart-icon" onClick={() => navigate("/cart")}>
             <FaShoppingCart size={24} />
-            {cartItems.length > 0 && (
-            <span className="cart-count">{cartItems.length}</span>
-            )}
+            {cartItems.length > 0 && <span className="cart-count">{cartItems.length}</span>}
           </div>
 
+          {/* Orders Button */}
+          {user && user.role === "user" && (
+            <div className="orders-btn-wrapper">
+              <Link to="/user/orders">
+                <button className="btn orders-btn">My Orders</button>
+              </Link>
+            </div>
+          )}
+
+          {/* User Profile Dropdown */}
           <div
             className="user-icon"
             onMouseEnter={() => setShowProfile(true)}

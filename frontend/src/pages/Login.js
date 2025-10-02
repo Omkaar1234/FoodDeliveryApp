@@ -18,16 +18,21 @@ function Login() {
     try {
       const response = await loginUser(email, password);
 
-      if (response.success) {
-        // Save token and role to localStorage
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("role", response.role);
-        localStorage.setItem("accountId", response.accountId);
+      // ✅ normalize response
+      const token = response.token || response?.data?.token;
+      const role = response.role || response?.user?.role;
+      const accountId = response.accountId || response?.user?._id;
+
+      if (token && role) {
+        // Save in localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+        localStorage.setItem("accountId", accountId);
 
         // Navigate based on role
-        if (response.role === "restaurant") {
+        if (role === "restaurant") {
           navigate("/restaurant/dashboard");
-        } else if (response.role === "user") {
+        } else if (role === "user") {
           navigate("/user/dashboard");
         } else {
           setMessage("Invalid role. Please contact support.");

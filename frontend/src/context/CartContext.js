@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Add item to cart
+  // ✅ Add item to cart
   const addToCart = (item) => {
     const quantityToAdd = item.quantity || 1;
     setCartItems((prev) => {
@@ -37,7 +37,7 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Remove item from cart
+  // ✅ Remove item from cart
   const removeFromCart = (itemId, restaurantId) => {
     setCartItems((prev) =>
       prev.filter(
@@ -46,9 +46,9 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // Update item quantity
+  // ✅ Update item quantity
   const updateQuantity = (itemId, restaurantId, quantity) => {
-    const safeQuantity = Math.max(1, quantity); // Minimum 1
+    const safeQuantity = Math.max(1, quantity); // minimum 1
     setCartItems((prev) =>
       prev.map((i) =>
         i._id === itemId && i.restaurantId === restaurantId
@@ -58,10 +58,10 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // Clear entire cart
+  // ✅ Clear entire cart
   const clearCart = () => setCartItems([]);
 
-  // Total price
+  // ✅ Total price
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0

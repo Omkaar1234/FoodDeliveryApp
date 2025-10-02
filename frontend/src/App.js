@@ -8,6 +8,7 @@ import RestaurantDashboard from "./pages/RestaurantDashboard";
 import UserRestaurantDetails from "./pages/UserRestaurantDetails";
 import CartPage from "./pages/CartPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import UserOrders from "./pages/UserOrders";
 
 function App() {
   return (
@@ -66,6 +67,9 @@ function App() {
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route path="/user/orders" element={<UserOrders />} />
+
       </Routes>
     </Router>
   );

@@ -1,254 +1,624 @@
-/* ---------- GLOBAL RESET ---------- */
-* {
+/* UserDashboard.css - Premium Food Delivery Dashboard Design */
+
+/* Import Google Fonts for a clean, professional look */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@400;600;700&display=swap');
+
+/* Global Reset and Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+}
+
+:root {
+  --primary: #ff6b35; /* Vibrant orange for food/appetite */
+  --primary-dark: #e55a2b;
+  --secondary: #667eea; /* Blue for trust/navigation */
+  --secondary-dark: #5a67d8;
+  --accent: #28a745; /* Green for success/orders */
+  --border: #e2e8f0;
+  --text: #2d3748;
+  --muted: #718096;
+  --bg-light: #f7fafc;
+  --white: #ffffff;
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --error: #e53e3e;
+  --success: #38a169;
 }
 
 body {
-  background-color: #f8fafc;
-  color: #1f2937;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%); /* Warm, inviting gradient for food theme */
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ---------- NAVBAR ---------- */
-.navbar {
+/* Main Layout */
+.dashboard-wrapper {
+  min-height: 100vh;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #ffffff;
-  padding: 15px 30px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-direction: column;
+}
+
+/* Navbar - Sticky, modern with glassmorphism */
+.navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+  box-shadow: var(--shadow-hover);
+  padding: 0.8rem 2rem;
+}
+
+/* Navbar Left - Logo */
+.navbar-left {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
-  height: 50px;
-  cursor: pointer;
+  height: 40px;
+  width: auto;
+  transition: transform 0.3s ease;
 }
 
+.logo:hover {
+  transform: scale(1.1) rotate(5deg); /* Playful hover for brand */
+}
+
+/* Navbar Center - Search Bar */
 .navbar-center {
   flex: 1;
+  max-width: 500px;
+  margin: 0 2rem;
+  position: relative;
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  align-items: center;
 }
 
 .search-input {
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  width: 300px;
+  width: 100%;
+  padding: 12px 20px 12px 50px;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  font-size: 16px;
+  background: var(--white);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   outline: none;
-  transition: all 0.3s ease;
 }
 
 .search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 5px rgba(59,130,246,0.3);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+  transform: translateY(-2px);
 }
 
+.search-input::placeholder {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* Search Icon Button */
 .search-btn {
-  padding: 10px 15px;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
   border: none;
-  background-color: #3b82f6;
-  color: #fff;
-  border-radius: 8px;
+  color: var(--muted);
+  font-size: 18px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  padding: 5px;
+  border-radius: 50%;
 }
 
 .search-btn:hover {
-  opacity: 0.9;
+  color: var(--primary);
+  background: rgba(255, 107, 53, 0.1);
+  transform: translateY(-50%) scale(1.1);
 }
 
+/* Navbar Right - Icons and Buttons */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 20px;
-  position: relative;
+  gap: 1.5rem;
 }
 
+/* Cart Icon with Badge */
 .cart-icon {
-  cursor: pointer;
   position: relative;
-}
-
-.user-icon {
   cursor: pointer;
-  position: relative;
-}
-
-.profile-dropdown {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  padding: 8px;
+  border-radius: 50%;
   transition: all 0.3s ease;
-  z-index: 10;
-}
-
-.profile-dropdown p {
-  font-size: 0.9rem;
-  color: #1f2937;
-}
-
-.profile-dropdown button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background-color: #3b82f6;
-  color: #fff;
-  font-weight: 500;
-}
-
-.profile-dropdown button:hover {
-  opacity: 0.9;
-}
-
-/* ---------- DASHBOARD CONTENT ---------- */
-.dashboard-content {
-  padding: 30px 50px;
-}
-
-.dashboard-content h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-}
-
-.dashboard-content p {
-  font-size: 1rem;
-  margin-bottom: 25px;
-  color: #4b5563;
-}
-
-/* ---------- RESTAURANT LIST ---------- */
-.restaurant-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.restaurant-card {
-  background-color: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.restaurant-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.1);
-}
-
-.restaurant-image {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.restaurant-info {
-  padding: 15px 20px;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  justify-content: center;
 }
 
-.restaurant-info h3 {
-  font-size: 1.2rem;
-  margin-bottom: 5px;
+.cart-icon:hover {
+  background: rgba(255, 107, 53, 0.1);
+  transform: scale(1.1);
 }
 
-.restaurant-info .small-text {
-  font-size: 0.85rem;
-  color: #6b7280;
+.cart-icon svg {
+  color: var(--text);
+  transition: color 0.3s ease;
 }
 
-.restaurant-info .rating {
-  color: #fbbf24; /* golden stars */
-  font-size: 1rem;
-  margin-bottom: 10px;
-}
-
-.view-menu-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  background-color: #10b981;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.view-menu-btn:hover {
-  opacity: 0.9;
-}
-
-/* ---------- LOADING & NO RESULTS ---------- */
-.restaurant-list p {
-  grid-column: 1/-1;
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 1024px) {
-  .dashboard-content {
-    padding: 20px;
-  }
-
-  .search-input {
-    width: 200px;
-  }
-}
-
-@media (max-width: 640px) {
-  .navbar {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-
-  .navbar-center {
-    justify-content: flex-start;
-    width: 100%;
-    gap: 10px;
-  }
-
-  .dashboard-content {
-    padding: 15px;
-  }
-
-  .restaurant-list {
-    grid-template-columns: 1fr;
-  }
+.cart-icon:hover svg {
+  color: var(--primary);
 }
 
 .cart-count {
   position: absolute;
   top: -5px;
   right: -5px;
-  background-color: red;
-  color: white;
-  font-size: 12px;
-  width: 18px;
-  height: 18px;
+  background: var(--primary);
+  color: var(--white);
   border-radius: 50%;
+  width: 20px;
+  height: 20px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  animation: cartBounce 0.6s ease-out; /* Bounce on load if items >0 */
+}
+
+/* Orders Button */
+.orders-btn-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.orders-btn {
+  background: linear-gradient(135deg, var(--accent), #38b2ac);
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.orders-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+}
+
+/* User Profile Icon and Dropdown */
+.user-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-icon:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.1);
+}
+
+.user-icon svg {
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+.user-icon:hover svg {
+  color: var(--secondary);
+}
+
+/* Profile Dropdown */
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-hover);
+  min-width: 200px;
+  padding: 15px;
+  margin-top: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid var(--border);
+  z-index: 1001;
+}
+
+.user-icon:hover .profile-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.profile-dropdown p {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.profile-dropdown p strong {
+  color: var(--text);
+  display: block;
+  font-size: 16px;
+}
+
+.profile-dropdown button {
+  width: 100%;
+  padding: 8px 12px;
+  margin: 5px 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 14px;
+}
+
+.profile-dropdown button:hover {
+  background: var(--bg-light);
+  border-color: var(--secondary);
+  color: var(--secondary);
+  transform: translateX(5px);
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-content h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  animation: welcomeGlow 2s ease-in-out infinite alternate; /* Subtle welcome pulse */
+}
+
+.dashboard-content p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-bottom: 3rem;
+}
+
+/* Loading and Error States */
+.loading,
+.error {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--muted);
+  padding: 4rem 2rem;
+}
+
+.error {
+  color: var(--error);
+  background: rgba(229, 62, 62, 0.1);
+  border: 1px solid var(--error);
+  border-radius: 12px;
+  padding: 2rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Restaurant List - Grid Layout */
+.restaurant-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* Restaurant Card - Attractive, interactive cards */
+.restaurant-card {
+  background: var(--white);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bounce transition */
+  position: relative;
+  cursor: pointer;
+  animation: cardSlideUp 0.6s ease-out forwards; /* Staggered entrance - but conditional via JS if needed */
+}
+
+.restaurant-card:nth-child(odd) {
+  animation-delay: 0.1s;
+}
+
+.restaurant-card:nth-child(even) {
+  animation-delay: 0.2s;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: var(--shadow-hover);
+}
+
+.restaurant-card::before { /* Subtle shine on hover */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.restaurant-card:hover::before {
+  left: 100%;
+}
+
+/* Restaurant Image */
+.restaurant-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.restaurant-card:hover .restaurant-image {
+  transform: scale(1.1); /* Zoom on hover */
+}
+
+/* Restaurant Info */
+.restaurant-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.restaurant-info h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.small-text {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Rating Stars - Styled text stars */
+.rating {
+  font-size: 1.2rem;
+  color: #fbbf24; /* Gold stars */
+  margin: 0.5rem 0;
+  letter-spacing: 2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.rating::after { /* Add sparkle effect on hover */
+  content: ' ✨';
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.restaurant-card:hover .rating::after {
+  opacity: 1;
+}
+
+/* View Menu Button */
+.view-menu-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  align-self: flex-start;
+  font-size: 14px;
+  margin-top: auto;
+}
+
+.view-menu-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+}
+
+/* No Results Message */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 1.2rem;
+  color: var(--muted);
+  background: var(--bg-light);
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+}
+
+/* Animations - Interactive and Engaging */
+@keyframes cartBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes welcomeGlow {
+  from {
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+  }
+  to {
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.6), 0 0 30px rgba(102, 126, 234, 0.4);
+  }
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Responsive Design - Mobile-First Enhancements */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .navbar-center {
+    margin: 0 1rem;
+    order: 3;
+    width: 100%;
+    max-width: none;
+  }
+
+  .navbar-right {
+    order: 2;
+    gap: 1rem;
+  }
+
+  .search-input {
+    padding-left: 40px;
+  }
+
+  .dashboard-content {
+    padding: 1rem;
+  }
+
+  .dashboard-content h2 {
+    font-size: 2rem;
+  }
+
+  .restaurant-list {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .orders-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.8rem;
+  }
+
+  .logo {
+    height: 30px;
+  }
+
+  .navbar-right {
+    gap: 0.5rem;
+  }
+
+  .user-icon svg,
+  .cart-icon svg {
+    font-size: 20px;
+  }
+
+  .dashboard-content p {
+    font-size: 1rem;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.2s !important;
+  }
+}
+
+input:focus-visible,
+button:focus-visible,
+.cart-icon:focus-visible,
+.user-icon:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .navbar {
+    border-bottom: 2px solid var(--primary);
+  }
+  
+  .restaurant-card {
+    border: 2px solid var(--border);
+  }
+  
+  .view-menu-btn,
+  .orders-btn {
+    border: 2px solid var(--primary);
+  }
+}
+
+/* Custom Loading Spinner (if needed, add via JS class) */
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

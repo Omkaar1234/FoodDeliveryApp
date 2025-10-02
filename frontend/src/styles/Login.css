@@ -1,8 +1,15 @@
-/* Better defaults */
+/* Login.css - Enhanced Professional Login Page with Integrated Design (Refined Animations) */
+
+/* Import Google Fonts for a clean, professional look (keeping Roboto as primary, but supporting Cambria fallback) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* Global Reset and Base Styles */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -11,130 +18,466 @@
   --border: #ddd;
   --text: #222;
   --muted: #555;
+  --error: crimson;
+  --success: #28a745;
+  --warning: #ffc107;
 }
 
-/* Full-page center */
+body {
+  font-family: 'Roboto', Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  line-height: 1.6;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scroll on animations */
+}
+
+/* Main Container - Integrated with user's positioning and background image */
 .login-container {
   min-height: 105vh;
   padding: 24px;
-  padding-right : 125px;
+  padding-right: 125px;
   display: flex;
   align-items: center;
-  justify-content: right;
+  justify-content: right; /* Right-aligned as per user's design */
   background-image: url("assets/bgPhoto.png");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  /* background: linear-gradient(135deg, #667eea, #764ba2); */
+  position: relative; /* For overlay effects if needed */
+  /* Removed bgFadeIn animation to prevent blinking on refresh - background loads naturally */
 }
 
-/* Card */
+/* Overlay for better readability on image (subtle darken, no animation) */
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Dark overlay to enhance form visibility */
+  z-index: 1;
+  /* Removed overlayFade animation to avoid load-time flicker */
+}
+
+.login-container > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Form Styling - Blended glassmorphism with user's white card */
 .login-form {
   width: 100%;
-  max-width: 500px;
-  background: #fff;
-  padding: 40px;
-  border-radius: 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  max-width: 500px; /* User's max-width */
+  background: rgba(255, 255, 255, 0.95); /* Subtle glassmorphism on white */
+  backdrop-filter: blur(10px); /* Keep modern blur */
+  padding: 40px; /* User's padding */
+  border-radius: 24px; /* User's radius */
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.2); /* User's shadow + subtle border glow */
   display: flex;
   flex-direction: column;
-  gap: 20px; /* space between groups */
+  gap: 20px; /* User's gap between groups */
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth bounce-like transition for hovers */
+  position: relative;
+  overflow: hidden;
+  /* Removed cardSlideInFromRight animation to prevent refresh blinking - form appears instantly and cleanly */
+  opacity: 1; /* Ensure immediate visibility */
+  transform: none; /* No initial transform */
 }
 
+.login-form::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(transparent, rgba(102, 126, 234, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.login-form:hover::after {
+  opacity: 1;
+  animation: rotate 4s linear infinite; /* Subtle rotating shine on hover for "beast" effect (interactive only) */
+}
+
+.login-form:hover {
+  transform: translateY(-8px) scale(1.02); /* Enhanced lift and subtle scale on hover */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(102, 126, 234, 0.2);
+}
+
+/* Title - Integrated user's font and size */
 .login-title {
-  margin: 0 0 6px 0;
-  font-size: 35px;
+  margin: 0 0 6px 0; /* User's margins */
+  font-size: 35px; /* User's size */
   color: var(--text);
   text-align: center;
-  font-family :Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Removed titleGlow infinite animation to eliminate blinking - now static gradient with subtle hover enhancement */
+  position: relative;
+  transition: text-shadow 0.3s ease; /* Subtle glow on hover only */
 }
 
-/* Groups */
+.login-title:hover {
+  text-shadow: 0 0 10px rgba(102, 126, 234, 0.4); /* Gentle glow on hover */
+}
+
+.login-title::before {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), #764ba2);
+  transition: width 0.4s ease;
+}
+
+.login-form:hover .login-title::before {
+  width: 80%; /* Underline expand on form hover */
+}
+
+/* Input Groups - User's flex structure */
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 8px; /* User's gap */
+  position: relative;
+  /* Removed inputStagger animation to avoid load-time stagger/blinking - elements appear naturally */
+  opacity: 1; /* Immediate visibility */
+  transform: none;
 }
 
 .input-group label {
-  font-weight: 600;
+  font-weight: 600; /* User's weight */
   color: var(--muted);
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
 }
 
-/* Inputs */
+.input-group:focus-within label {
+  color: var(--primary);
+  transform: translateX(5px); /* Subtle label slide on focus (interactive) */
+}
+
+/* Input Fields - Blended heights/paddings */
 .input-group input,
 .password-wrapper input {
   width: 100%;
-  height: 44px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 15px;
+  height: 44px; /* User's height */
+  padding: 10px 12px; /* User's padding */
+  border: 1px solid var(--border); /* User's border */
+  border-radius: 8px; /* User's radius */
+  font-size: 15px; /* User's size */
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth elastic transition */
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  /* No load animation - appears clean */
 }
 
 .input-group input:focus,
 .password-wrapper input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(102, 126, 234, 0.1); /* Enhanced glow */
+  background: #fff;
+  transform: translateY(-2px) scale(1.02); /* Lift and subtle scale on focus (interactive) */
 }
 
-/* Password eye */
+.input-group input::placeholder,
+.password-wrapper input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.input-group input:focus::placeholder {
+  opacity: 0; /* Fade placeholder on focus */
+}
+
+/* Password Wrapper and Eye Icon - User's positioning */
 .password-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .password-wrapper input {
-  padding-right: 42px; /* room for eye */
+  padding-right: 42px; /* User's room for eye */
 }
 
 .eye-icon {
   position: absolute;
-  right: 12px;
+  right: 12px; /* User's position */
   top: 50%;
   transform: translateY(-50%);
-  font-size: 18px;
+  font-size: 18px; /* User's size */
   color: var(--muted);
   cursor: pointer;
   user-select: none;
+  transition: all 0.3s ease;
+  padding: 4px;
+  border-radius: 50%;
+  z-index: 2;
 }
 
-/* Button */
-.btn-login {
-  margin-left: 135px;
-  padding : 5px;
-  width: 35%;
-  height: 46px;
-  border : none;
-  border-radius: 25px;
+.eye-icon:hover {
+  color: var(--primary);
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-50%) scale(1.2) rotate(10deg); /* Scale + rotate for fun interaction */
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.eye-icon:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Register Paragraph - User's margins */
+#para {
+  text-align: center;
+  margin-top: 0%; /* User's top */
+  margin-bottom: 10px; /* User's bottom */
+  font-size: 0.95rem;
+  color: var(--muted);
+  /* Removed fadeInUp animation to prevent any load flicker - appears instantly */
+  transition: color 0.3s ease; /* Only for hover */
+  opacity: 1;
+}
+
+#para a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+}
+
+#para a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
   background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+#para a:hover {
+  color: var(--primary-dark);
+}
+
+#para a:hover::after {
+  width: 100%; /* Animated underline on hover */
+}
+
+/* Login Button - Integrated user's positioning and styles */
+.btn-login {
+  margin-left: 135px; /* User's margin-left for right-push */
+  padding: 5px; /* User's padding */
+  width: 35%; /* User's width */
+  height: 46px; /* User's height */
+  border: none; /* User's border */
+  border-radius: 25px; /* User's radius */
+  background: linear-gradient(135deg, var(--primary), #764ba2); /* Enhanced gradient */
   color: #fff;
-  font-weight: 900;
-  letter-spacing: 0.3px;
+  font-weight: 900; /* User's weight */
+  letter-spacing: 0.3px; /* User's spacing */
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.04s ease;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bounce transition */
+  position: relative;
+  overflow: hidden;
+  /* Removed buttonPulse infinite animation to eliminate any pulsing/blinking on load - now static with hover effects */
+  margin-bottom: 10px; /* Add some bottom space */
+}
+
+.btn-login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-login:hover::before {
+  left: 100%; /* Shine sweep on hover */
 }
 
 .btn-login:hover {
-  background: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-dark), #5a3d8c);
+  transform: translateY(-4px) scale(1.05); /* Enhanced lift and scale on hover */
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4), 0 0 20px rgba(102, 126, 234, 0.2); /* Glow shadow */
 }
 
 .btn-login:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.98); /* User's active + subtle squash */
 }
 
-/* Message */
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  background: var(--border);
+}
+
+/* Message Display - User's color and margins */
 .message {
-  margin-top: 4px;
+  margin-top: 4px; /* User's top */
   text-align: center;
-  color: crimson;
-  font-size: 14px;
+  font-size: 14px; /* User's size */
+  font-weight: 500;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  /* Kept messageSlideIn as it's conditional (only shows when message appears, not on every load) */
+  animation: messageSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all 0.3s ease;
 }
 
-#para{
-  text-align: center;
-  margin-top: 0%;
-  margin-bottom: 10px;
+.message.error {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--error); /* User's crimson */
+  border-color: var(--error);
+  animation: shake 0.5s ease-in-out; /* Shake for errors (interactive/conditional) */
 }
 
+.message.success {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.message.warning {
+  background: rgba(255, 193, 7, 0.1);
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+/* Retained Animations - Only Interactive/Conditional Ones */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Optional: If you want a subtle entrance without blinking, add this class via JS (e.g., after component mounts) */
+/* .login-form.animated { animation: cardSlideInFromRight 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both; } */
+/* And define: */
+@keyframes cardSlideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px) scale(0.9) rotateY(10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotateY(0deg);
+  }
+}
+
+/* Responsive Design - Enhanced for mobile */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 20px;
+    padding-right: 20px; /* Reduce right padding on mobile */
+    justify-content: center; /* Center on smaller screens */
+    min-height: 100vh;
+  }
+
+  .login-form {
+    max-width: 90%;
+    padding: 30px 25px;
+    border-radius: 20px;
+    gap: 16px;
+  }
+
+  .login-title {
+    font-size: 28px;
+  }
+
+  .btn-login {
+    margin-left: 0; /* Remove left margin on mobile */
+    width: 100%; /* Full width on mobile */
+    max-width: 200px;
+    align-self: center; /* Center button */
+  }
+
+  .input-group input,
+  .password-wrapper input {
+    height: 48px; /* Slightly taller for touch */
+    font-size: 16px; /* Better mobile input */
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 15px;
+    background-size: cover;
+  }
+
+  .login-form {
+    padding: 25px 20px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.2s !important; /* Keep essential transitions */
+  }
+}
+
+input:focus-visible,
+button:focus-visible,
+.eye-icon:focus-visible,
+label:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .login-form {
+    border: 2px solid var(--primary);
+  }
+  
+  input:focus,
+  .btn-login:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary) !important;
+  }
+}

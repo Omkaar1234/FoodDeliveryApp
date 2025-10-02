@@ -1,15 +1,27 @@
+// routes/orderRoutes.js
 import express from "express";
 import Order from "../models/Order.js";
 import { authMiddleware, requireRole } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ✅ Place a new order (User only)
+// Allowed status transitions
+const validStatusTransitions = {
+  Pending: ["Accepted", "Cancelled"],
+  Accepted: ["Preparing", "Cancelled"],
+  Preparing: ["Out for Delivery"],
+  "Out for Delivery": ["Delivered"],
+  Delivered: [],
+  Cancelled: [],
+};
+
+// -------------------- Place a new order (User only) --------------------
 router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   try {
     const { restaurantId, items, total, deliveryAddress } = req.body;
-    if (!restaurantId || !items || !items.length || !total || !deliveryAddress)
+    if (!restaurantId || !items?.length || !total || !deliveryAddress) {
       return res.status(400).json({ error: "All fields are required" });
+    }
 
     const order = new Order({
       userId: req.user.id,
@@ -28,49 +40,77 @@ router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   }
 });
 
-// ✅ Get all orders for logged-in restaurant
-router.get("/restaurant", authMiddleware, requireRole("restaurant"), async (req, res) => {
-  try {
-    const orders = await Order.find({ restaurantId: req.user.id }).sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (err) {
-    console.error("GET /orders/restaurant error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+// -------------------- Get all orders for logged-in restaurant --------------------
+router.get(
+  "/restaurant",
+  authMiddleware,
+  requireRole("restaurant"),
+  async (req, res) => {
+    try {
+      const orders = await Order.find({ restaurantId: req.user.id })
+        .populate("userId", "name email contact address") // full user info
+        .sort({ createdAt: -1 });
 
-// ✅ Get all orders for logged-in user
+      res.json(orders);
+    } catch (err) {
+      console.error("GET /orders/restaurant error:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+
+// -------------------- Get all orders for logged-in user --------------------
 router.get("/user", authMiddleware, requireRole("user"), async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
-    res.json(orders);
+    const orders = await Order.find({ userId: req.user.id })
+      .populate("restaurantId", "name")
+      .sort({ createdAt: -1 });
+
+    const ordersWithName = orders.map((o) => ({
+      ...o._doc,
+      restaurantName: o.restaurantId.name,
+    }));
+
+    res.json(ordersWithName);
   } catch (err) {
     console.error("GET /orders/user error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// ✅ Update order status (Restaurant only)
-router.put("/:id/status", authMiddleware, requireRole("restaurant"), async (req, res) => {
-  try {
-    const { status } = req.body;
-    const validStatus = ["Pending", "Preparing", "Delivered", "Cancelled"];
-    if (!validStatus.includes(status)) return res.status(400).json({ error: "Invalid status" });
+// -------------------- Update order status (Restaurant only) --------------------
+router.put(
+  "/:orderId/status",
+  authMiddleware,
+  requireRole("restaurant"),
+  async (req, res) => {
+    try {
+      const { status } = req.body;
+      const order = await Order.findById(req.params.orderId);
 
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ error: "Order not found" });
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
 
-    if (order.restaurantId.toString() !== req.user.id)
-      return res.status(403).json({ error: "Access denied" });
+      // Validate allowed status transition
+      if (!validStatusTransitions[order.status].includes(status)) {
+        return res.status(400).json({ error: "Invalid status transition" });
+      }
 
-    order.status = status;
-    await order.save();
+      order.status = status;
+      await order.save();
 
-    res.json({ message: "Order status updated", order });
-  } catch (err) {
-    console.error("PUT /orders/:id/status error:", err);
-    res.status(500).json({ error: "Server error" });
+      // Populate user info before returning
+      await order.populate("userId", "name email contact address");
+
+      res.json({ message: "Order status updated", order });
+    } catch (err) {
+      console.error("PUT /orders/:orderId/status error:", err);
+      res
+        .status(500)
+        .json({ error: "Server error while updating order status" });
+    }
   }
-});
+);
 
 export default router;
