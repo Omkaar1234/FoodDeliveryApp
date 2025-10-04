@@ -11,23 +11,27 @@ import authRoutes from "./routes/authRoutes.js";
 import restaurantRoutes from "./routes/restaurantRoutes.js";
 import restaurantOrdersRoutes from "./routes/restaurantOrderRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import userRoutes from "./routes/userRoutes.js"; // ✅ new import
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 const app = express();
 
 // ------------------- MIDDLEWARES -------------------
-// CORS setup for frontend (React dev server)
-app.use(cors({
-  origin: "https://fooooddeliveryapp.netlify.app",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000", // for local testing
+      "https://fooooddeliveryapp.netlify.app", // your frontend URL
+    ],
+    credentials: true,
+  })
+);
 
-// Parse JSON and URL-encoded bodies
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Handle invalid JSON errors
+// Handle invalid JSON
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     return res.status(400).json({ success: false, error: "Invalid JSON" });
@@ -40,33 +44,37 @@ app.use("/api/auth", authRoutes);
 app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/restaurant/orders", restaurantOrdersRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api", userRoutes); // ✅ this adds /api/profile
+app.use("/api", userRoutes);
 
-// ------------------- TEST ROUTE -------------------
-app.get("/api/test", (req, res) => res.json({ success: true, message: "Backend is running" }));
+// Test route
+app.get("/api/test", (req, res) =>
+  res.json({ success: true, message: "Backend is running fine 🚀" })
+);
 
-// ------------------- SERVE REACT FRONTEND (PRODUCTION) -------------------
+// ------------------- SERVE FRONTEND (for production) -------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "client/build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client/build", "index.html"));
-  });
+  const buildPath = path.join(__dirname, "client", "build");
+  app.use(express.static(buildPath));
+  app.get("*", (req, res) => res.sendFile(path.join(buildPath, "index.html")));
 }
 
-// ------------------- MONGODB CONNECTION -------------------
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/yumexpress";
+// ------------------- DATABASE CONNECTION -------------------
+const MONGO_URI =
+  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/yumexpress";
 const PORT = process.env.PORT || 5000;
 
 mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB connected");
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, "0.0.0.0", () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   })
   .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err);
+    console.error("❌ MongoDB connection failed:", err.message);
     process.exit(1);
   });
