@@ -40,8 +40,8 @@ app.use((err, req, res, next) => {
 });
 
 // ------------------- API ROUTES -------------------
-app.use("/api/auth", authRoutes);
-// app.use("/api/restaurants", restaurantRoutes);
+// app.use("/api/auth", authRoutes);
+app.use("/api/restaurants", restaurantRoutes);
 // app.use("/api/restaurant/orders", restaurantOrdersRoutes);
 // app.use("/api/orders", orderRoutes);
 // app.use("/api", userRoutes);
