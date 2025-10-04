@@ -28,7 +28,7 @@ function UserOrders() {
       }
 
       try {
-        const res = await fetch("http://localhost:5000/api/orders/user", {
+        const res = await fetch("/orders/user", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

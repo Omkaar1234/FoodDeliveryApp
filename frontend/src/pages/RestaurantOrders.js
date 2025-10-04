@@ -28,7 +28,7 @@ function RestaurantOrders() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/orders/restaurant", {
+      const res = await fetch("/orders/restaurant", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -67,7 +67,7 @@ function RestaurantOrders() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/orders/${orderId}/status`,
+        `/orders/${orderId}/status`,
         {
           method: "PUT",
           headers: {
