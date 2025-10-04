@@ -40,26 +40,26 @@ app.use((err, req, res, next) => {
 });
 
 // ------------------- API ROUTES -------------------
-// app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/restaurants", restaurantRoutes);
-// app.use("/api/restaurant/orders", restaurantOrdersRoutes);
-// app.use("/api/orders", orderRoutes);
-// app.use("/api", userRoutes);
+app.use("/api/restaurant/orders", restaurantOrdersRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api", userRoutes);
 
 // Test route
-app.get("/api/test", (req, res) =>
-  res.json({ success: true, message: "Backend is running fine 🚀" })
-);
+// app.get("/api/test", (req, res) =>
+//   res.json({ success: true, message: "Backend is running fine 🚀" })
+// );
 
 // ------------------- SERVE FRONTEND (for production) -------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "client", "build");
-  app.use(express.static(buildPath));
-  app.get("*", (req, res) => res.sendFile(path.join(buildPath, "index.html")));
-}
+// if (process.env.NODE_ENV === "production") {
+//   const buildPath = path.join(__dirname, "client", "build");
+//   app.use(express.static(buildPath));
+//   app.get("*", (req, res) => res.sendFile(path.join(buildPath, "index.html")));
+// }
 
 // ------------------- DATABASE CONNECTION -------------------
 const MONGO_URI =
