@@ -60,22 +60,24 @@ router.get(
 );
 
 // -------------------- Get all orders for logged-in user --------------------
+
 router.get("/user", authMiddleware, requireRole("user"), async (req, res) => {
-  try {
-    const orders = await Order.find({ userId: req.user.id })
-      .populate("restaurantId", "name")
-      .sort({ createdAt: -1 });
+  try {
+    const orders = await Order.find({ userId: req.user.id })
+      .populate("restaurantId", "name")
+      .sort({ createdAt: -1 });
 
-    const ordersWithName = orders.map((o) => ({
-      ...o._doc,
-      restaurantName: o.restaurantId.name,
-    }));
+    const ordersWithName = orders.map((o) => ({
+      ...o._doc,
+      // ✅ FIX: Safely access the restaurant name using optional chaining or a ternary operator
+      restaurantName: o.restaurantId ? o.restaurantId.name : "Deleted Restaurant",
+    }));
 
-    res.json(ordersWithName);
-  } catch (err) {
-    console.error("GET /orders/user error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
+    res.json(ordersWithName);
+  } catch (err) {
+    console.error("GET /orders/user error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // -------------------- Update order status (Restaurant only) --------------------
