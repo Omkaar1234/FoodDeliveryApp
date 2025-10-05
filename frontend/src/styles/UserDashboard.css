@@ -35,7 +35,7 @@ body {
   color: var(--text);
   background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%); /* Warm, inviting gradient for food theme */
   min-height: 100vh;
-  overflow-x: auto; /* Changed from hidden to auto to prevent clipping/distortion */
+  overflow-x: hidden;
 }
 
 /* Main Layout */
@@ -59,8 +59,6 @@ body {
   align-items: center;
   justify-content: space-between;
   transition: all 0.3s ease;
-  flex-wrap: nowrap; /* Prevent unwanted wrapping on larger screens */
-  min-height: 60px; /* Ensure consistent height to avoid jumps */
 }
 
 .navbar.scrolled {
@@ -72,14 +70,11 @@ body {
 .navbar-left {
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* Prevent shrinking */
-  min-width: 120px; /* Ensure space for logo */
 }
 
 .logo {
   height: 40px;
   width: auto;
-  max-width: 100%; /* Prevent overflow */
   transition: transform 0.3s ease;
 }
 
@@ -95,7 +90,6 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 200px; /* Minimum width to prevent overlap */
 }
 
 .search-input {
@@ -107,7 +101,6 @@ body {
   background: var(--white);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   outline: none;
-  box-sizing: border-box; /* Ensure padding doesn't cause overflow */
 }
 
 .search-input:focus {
@@ -135,7 +128,6 @@ body {
   transition: all 0.3s ease;
   padding: 5px;
   border-radius: 50%;
-  z-index: 10; /* Ensure it stays above input */
 }
 
 .search-btn:hover {
@@ -149,8 +141,6 @@ body {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  flex-shrink: 0; /* Prevent shrinking */
-  min-width: 200px; /* Ensure space for icons/buttons */
 }
 
 /* Cart Icon with Badge */
@@ -163,7 +153,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .cart-icon:hover {
@@ -174,8 +163,6 @@ body {
 .cart-icon svg {
   color: var(--text);
   transition: color 0.3s ease;
-  width: 24px;
-  height: 24px; /* Fixed size to prevent distortion */
 }
 
 .cart-icon:hover svg {
@@ -197,14 +184,12 @@ body {
   font-size: 12px;
   font-weight: 700;
   animation: cartBounce 0.6s ease-out; /* Bounce on load if items >0 */
-  min-width: 20px; /* Prevent shrinkage */
 }
 
 /* Orders Button */
 .orders-btn-wrapper {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .orders-btn {
@@ -219,8 +204,6 @@ body {
   font-size: 14px;
   text-decoration: none;
   display: inline-block;
-  white-space: nowrap; /* Prevent text wrapping */
-  min-width: 80px; /* Minimum width */
 }
 
 .orders-btn:hover {
@@ -238,7 +221,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .user-icon:hover {
@@ -249,8 +231,6 @@ body {
 .user-icon svg {
   color: var(--text);
   transition: color 0.3s ease;
-  width: 24px;
-  height: 24px; /* Fixed size to prevent distortion */
 }
 
 .user-icon:hover svg {
@@ -305,7 +285,6 @@ body {
   transition: all 0.3s ease;
   text-align: left;
   font-size: 14px;
-  box-sizing: border-box;
 }
 
 .profile-dropdown button:hover {
@@ -322,7 +301,6 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  box-sizing: border-box; /* Ensure padding doesn't cause overflow */
 }
 
 .dashboard-content h2 {
@@ -344,9 +322,6 @@ body {
   font-size: 1.1rem;
   color: var(--muted);
   margin-bottom: 3rem;
-  max-width: 600px; /* Prevent wide text from causing layout issues */
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* Loading and Error States */
@@ -356,7 +331,6 @@ body {
   font-size: 1.2rem;
   color: var(--muted);
   padding: 4rem 2rem;
-  max-width: 100%; /* Ensure they don't overflow */
 }
 
 .error {
@@ -366,8 +340,6 @@ body {
   border-radius: 12px;
   padding: 2rem;
   animation: shake 0.5s ease-in-out;
-  margin: 0 auto;
-  max-width: 500px;
 }
 
 /* Restaurant List - Grid Layout */
@@ -376,8 +348,6 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
-  width: 100%; /* Ensure full width within container */
-  justify-content: center; /* Center if fewer columns */
 }
 
 /* Restaurant Card - Attractive, interactive cards */
@@ -390,10 +360,6 @@ body {
   position: relative;
   cursor: pointer;
   animation: cardSlideUp 0.6s ease-out forwards; /* Staggered entrance - but conditional via JS if needed */
-  width: 100%; /* Ensure cards take full grid cell */
-  max-width: 100%; /* Prevent overflow */
-  display: flex;
-  flex-direction: column;
 }
 
 .restaurant-card:nth-child(odd) {
@@ -430,7 +396,6 @@ body {
   height: 200px;
   object-fit: cover;
   transition: transform 0.4s ease;
-  flex-shrink: 0; /* Prevent image from shrinking */
 }
 
 .restaurant-card:hover .restaurant-image {
@@ -443,8 +408,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  flex: 1; /* Allow info to grow and push button to bottom */
-  min-height: 150px; /* Minimum height to prevent uneven cards */
 }
 
 .restaurant-info h3 {
@@ -453,14 +416,12 @@ body {
   font-weight: 600;
   color: var(--text);
   margin-bottom: 0.5rem;
-  word-wrap: break-word; /* Prevent long names from overflowing */
 }
 
 .small-text {
   font-size: 0.9rem;
   color: var(--muted);
   font-weight: 500;
-  word-wrap: break-word;
 }
 
 /* Rating Stars - Styled text stars */
@@ -494,10 +455,7 @@ body {
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   align-self: flex-start;
   font-size: 14px;
-  margin-top: auto; /* Push to bottom */
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-width: 120px;
+  margin-top: auto;
 }
 
 .view-menu-btn:hover {
@@ -514,8 +472,6 @@ body {
   background: var(--bg-light);
   border-radius: 12px;
   border: 1px dashed var(--border);
-  grid-column: 1 / -1; /* Span full grid if used in grid */
-  max-width: 100%;
 }
 
 /* Animations - Interactive and Engaging */
@@ -550,43 +506,28 @@ body {
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
-/* UserDashboard.css - Premium Food Delivery Dashboard Design (Continued) */
-
-/* ... (Previous CSS code remains the same up to the media query) ... */
-
 /* Responsive Design - Mobile-First Enhancements */
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
-    flex-wrap: wrap; /* Allow wrapping on small screens */
+    flex-wrap: wrap;
     gap: 1rem;
-    justify-content: space-between; /* Distribute space evenly */
-    min-height: 70px; /* Slightly taller for mobile */
-  }
-
-  .navbar-left {
-    min-width: auto;
-    order: 1;
   }
 
   .navbar-center {
-    margin: 0 0.5rem; /* Reduced margin */
+    margin: 0 1rem;
     order: 3;
     width: 100%;
     max-width: none;
-    flex: 1 1 100%; /* Full width on wrap */
   }
 
   .navbar-right {
     order: 2;
     gap: 1rem;
-    min-width: auto;
-    justify-content: flex-end;
   }
 
   .search-input {
     padding-left: 40px;
-    min-width: 200px; /* Ensure search doesn't collapse too much */
   }
 
   .dashboard-content {
@@ -606,31 +547,11 @@ body {
     padding: 8px 16px;
     font-size: 13px;
   }
-
-  .restaurant-card {
-    max-width: 100%; /* Ensure cards don't overflow on mobile */
-  }
-
-  .restaurant-info {
-    min-height: 120px; /* Adjust for smaller screens */
-  }
-
-  .view-menu-btn {
-    padding: 10px 20px;
-    font-size: 13px;
-    min-width: 100px;
-  }
-
-  .profile-dropdown {
-    min-width: 180px;
-    right: -20px; /* Adjust position to prevent overflow */
-  }
 }
 
 @media (max-width: 480px) {
   .navbar {
     padding: 0.8rem;
-    gap: 0.5rem;
   }
 
   .logo {
@@ -646,59 +567,7 @@ body {
     font-size: 20px;
   }
 
-  .dashboard-content {
-    padding: 0.5rem;
-  }
-
   .dashboard-content p {
-    font-size: 1rem;
-  }
-
-  .dashboard-content h2 {
-    font-size: 1.8rem;
-  }
-
-  .restaurant-list {
-    gap: 1rem;
-  }
-
-  .restaurant-image {
-    height: 150px; /* Smaller image on very small screens */
-  }
-
-  .restaurant-info {
-    padding: 1rem;
-    min-height: 100px;
-  }
-
-  .restaurant-info h3 {
-    font-size: 1.3rem;
-  }
-
-  .search-input {
-    padding: 10px 15px 10px 40px;
-    font-size: 14px;
-  }
-
-  .search-btn {
-    left: 10px;
-    font-size: 16px;
-  }
-
-  .orders-btn {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  .view-menu-btn {
-    padding: 8px 16px;
-    font-size: 12px;
-  }
-
-  .no-results,
-  .loading,
-  .error {
-    padding: 2rem 1rem;
     font-size: 1rem;
   }
 }
@@ -712,22 +581,12 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.2s !important;
   }
-
-  .restaurant-card:hover,
-  .view-menu-btn:hover,
-  .orders-btn:hover,
-  .cart-icon:hover,
-  .user-icon:hover,
-  .search-btn:hover {
-    transform: none !important; /* Disable transforms for reduced motion */
-  }
 }
 
 input:focus-visible,
 button:focus-visible,
 .cart-icon:focus-visible,
-.user-icon:focus-visible,
-.search-btn:focus-visible {
+.user-icon:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -746,14 +605,6 @@ button:focus-visible,
   .orders-btn {
     border: 2px solid var(--primary);
   }
-
-  .search-input {
-    border-width: 2px;
-  }
-
-  .search-input:focus {
-    border-width: 3px;
-  }
 }
 
 /* Custom Loading Spinner (if needed, add via JS class) */
@@ -770,24 +621,4 @@ button:focus-visible,
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-/* Additional fixes for distortion prevention */
-html {
-  overflow-x: hidden; /* Prevent horizontal scroll on body level if needed */
-}
-
-.dashboard-wrapper {
-  overflow-x: hidden; /* Contain any potential overflows within wrapper */
-}
-
-/* Ensure grid items don't overflow */
-.restaurant-list > * {
-  max-width: 100%;
-  overflow: hidden;
-}
-
-/* Fix for any potential z-index issues with dropdowns */
-.profile-dropdown {
-  max-width: calc(100vw - 20px); /* Prevent dropdown from overflowing viewport */
 }
