@@ -41,7 +41,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: right; /* Right-aligned as per Login's design */
-  background-image: url("assets/bgPhoto.png"); /* Same background as Login */
+  background-image: url("assets/registerBG.png"); /* Same background as Login */
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
