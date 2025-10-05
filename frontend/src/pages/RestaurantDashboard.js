@@ -99,7 +99,8 @@ const RestaurantDashboard = () => {
 
   // ---------------- MENU OPERATIONS ----------------
   const addMenuItem = async () => {
-    if (!newMenuItem.name || newMenuItem.price === "") return alert("Enter name & price!");
+    // NOTE: Using alert() is discouraged but maintained from original code
+    if (!newMenuItem.name || newMenuItem.price === "") return alert("Enter name & price!"); 
     try {
       // Using authFetch, assume endpoint starts with /api
       const addedItem = await authFetch("/restaurants/me/menu", {
@@ -113,7 +114,6 @@ const RestaurantDashboard = () => {
       setNewMenuItem({ name: "", price: "" });
     } catch (err) {
       console.error("addMenuItem error:", err);
-      // NOTE: alert() is bad practice, but retained from your original code.
       alert(err.message || "Failed to add menu item"); 
     }
   };
@@ -258,7 +258,7 @@ const RestaurantDashboard = () => {
       </aside>
 
       <main className="main-content">
-        {/* ORDERS TAB */}
+        {/* ORDERS TAB REMAINS UNCHANGED */}
         {activeTab === "orders" && (
           <section className="tab-section">
             <h2 className="section-title">📦 Manage Orders</h2>
@@ -366,7 +366,7 @@ const RestaurantDashboard = () => {
           </section>
         )}
 
-        {/* MENU TAB */}
+        {/* MENU TAB REMAINS UNCHANGED */}
         {activeTab === "menu" && (
           <section className="tab-section">
             <h2 className="section-title">🍴 Manage Menu</h2>
@@ -441,6 +441,55 @@ const RestaurantDashboard = () => {
           <section className="tab-section">
             <h2 className="section-title">🏪 Restaurant Profile</h2>
             <form className="profile-form" onSubmit={(e) => { e.preventDefault(); updateProfile(); }}>
+              
+                {/* ---------------- IMAGE UPLOAD SECTION ---------------- */}
+                <div className="image-upload-section">
+                    <h3>Restaurant Photo</h3>
+                    <div className="current-image-preview">
+                        {profile.image ? (
+                            <img 
+                                src={profile.image} 
+                                alt="Restaurant Logo" 
+                                className="uploaded-logo"
+                            />
+                        ) : (
+                            <div className="no-image-placeholder">
+                                <FaCamera size={50} />
+                                <p>No image uploaded</p>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="upload-controls">
+                        <input 
+                            type="file" 
+                            id="imageUpload" 
+                            onChange={handleFileChange} 
+                            accept="image/png, image/jpeg"
+                            disabled={uploading}
+                        />
+                        
+                        <label htmlFor="imageUpload" className="file-input-label">
+                            <FaUpload /> {file ? file.name : 'Choose Image (Max 5MB)'}
+                        </label>
+
+                        <button 
+                            onClick={handleImageUpload} 
+                            className="btn-upload" 
+                            disabled={uploading || !file}
+                        >
+                            {uploading ? 'Uploading...' : 'Save & Upload Photo'}
+                        </button>
+                    </div>
+                    
+                    {uploadMessage.text && (
+                        <p className={`upload-status ${uploadMessage.type}`}>
+                            {uploadMessage.text}
+                        </p>
+                    )}
+                </div>
+                {/* ---------------- END IMAGE UPLOAD SECTION ---------------- */}
+
               <div className="form-group">
                 <label>Restaurant Name</label>
                 <input
@@ -465,12 +514,12 @@ const RestaurantDashboard = () => {
                   placeholder="Enter contact number"
                 />
               </div>
-              <button type="submit" className="save-profile-btn">Save Profile</button>
+              <button type="submit" className="save-profile-btn">Save General Profile Details</button>
             </form>
           </section>
         )}
 
-        {/* ANALYTICS TAB */}
+        {/* ANALYTICS TAB REMAINS UNCHANGED */}
         {activeTab === "analytics" && (
           <section className="tab-section">
             <h2 className="section-title">📊 Analytics Dashboard</h2>
