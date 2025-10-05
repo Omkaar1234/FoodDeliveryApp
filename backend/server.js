@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000", // for local testing
-      "https://yumexpress.vercel.app/", // your frontend URL
+      "https://yumexpress.vercel.app", // your frontend URL
     ],
     credentials: true,
   })
