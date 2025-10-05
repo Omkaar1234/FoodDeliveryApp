@@ -1,4 +1,4 @@
-/* src/styles/RestaurantDashboard.css */
+/* src/styles/RestaurantDashboard.css - Part 1: Global to Menu Tab */
 
 /* Global Styles */
 * {
@@ -20,7 +20,7 @@ body {
   animation: fadeIn 0.6s ease-out;
 }
 
-/* Animations */
+/* Animations (Used Across Tabs) */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -72,7 +72,7 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-/* Loading and Error */
+/* Loading and Error States (Used for Initial Load/Errors) */
 .loading-container,
 .error-container {
   display: flex;
@@ -84,7 +84,8 @@ body {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin: 20px;
+  margin: 20px auto;
+  max-width: 400px;
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -98,8 +99,7 @@ body {
   margin-bottom: 20px;
 }
 
-.loading-container p,
-.error {
+.loading-container p {
   font-size: 1.1em;
   color: #666;
   margin-top: 10px;
@@ -112,6 +112,8 @@ body {
   border-radius: 8px;
   padding: 15px;
   margin: 20px 0;
+  font-size: 1em;
+  text-align: center;
 }
 
 .retry-btn {
@@ -124,14 +126,16 @@ body {
   font-size: 1em;
   margin-top: 15px;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
 .retry-btn:hover {
   background: #2980b9;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
 }
 
-/* Sidebar */
+/* Sidebar (Navigation) */
 .sidebar {
   width: 250px;
   background: white;
@@ -140,6 +144,7 @@ body {
   display: flex;
   flex-direction: column;
   animation: slideInUp 0.6s ease-out;
+  min-height: 100vh;
 }
 
 .sidebar-header {
@@ -152,6 +157,10 @@ body {
   font-size: 1.5em;
   color: #2c3e50;
   margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .sidebar-header p {
@@ -163,6 +172,7 @@ body {
   list-style: none;
   flex: 1;
   padding: 10px 0;
+  overflow-y: auto;
 }
 
 .nav-item {
@@ -185,26 +195,32 @@ body {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   transform: translateX(5px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
 .nav-icon {
   font-size: 1.2em;
+  flex-shrink: 0;
 }
 
 .nav-label {
   font-weight: 500;
 }
 
-/* Main Content */
+/* Main Content (Wrapper for All Tabs) */
 .main-content {
   flex: 1;
   padding: 30px;
   overflow-y: auto;
+  background: rgba(255, 255, 255, 0.8);
   animation: fadeIn 0.6s ease-out 0.2s both;
+  min-height: 100vh;
 }
 
 .tab-section {
   animation: slideInUp 0.5s ease-out;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .section-title {
@@ -216,14 +232,16 @@ body {
   gap: 10px;
   border-bottom: 2px solid #3498db;
   padding-bottom: 10px;
+  font-weight: 600;
 }
 
-/* Orders Tab */
+/* Orders Tab Styles */
 .order-list {
   display: grid;
   gap: 20px;
   max-height: 70vh;
   overflow-y: auto;
+  padding-right: 10px; /* For scrollbar space */
 }
 
 .order-card {
@@ -269,6 +287,7 @@ body {
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   animation: pulse 2s infinite;
+  min-width: fit-content;
 }
 
 .status-icon {
@@ -285,23 +304,45 @@ body {
 .order-address {
   font-size: 0.95em;
   color: #6c757d;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
 .user-info strong,
 .order-address strong {
+  color: #2c3e50;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.order-items {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.order-items strong {
+  display: block;
+  margin-bottom: 8px;
   color: #2c3e50;
 }
 
 .order-items ul {
   list-style: none;
   padding: 0;
-  margin: 5px 0;
+  margin: 0;
 }
 
 .order-items li {
   padding: 5px 0;
   border-bottom: 1px solid #f0f0f0;
   color: #333;
+  font-size: 0.95em;
+}
+
+.order-items li:last-child {
+  border-bottom: none;
 }
 
 .order-total {
@@ -310,6 +351,9 @@ body {
   color: #27ae60;
   font-weight: bold;
   margin-top: 10px;
+  padding: 10px;
+  background: #d4edda;
+  border-radius: 6px;
 }
 
 .order-actions {
@@ -318,6 +362,7 @@ body {
   justify-content: flex-end;
   padding-top: 15px;
   border-top: 1px solid #e0e0e0;
+  flex-wrap: wrap;
 }
 
 .action-btn {
@@ -328,7 +373,19 @@ body {
   font-size: 0.9em;
   font-weight: 600;
   transition: all 0.3s ease;
-  min-width: 100px;
+  min-width: 120px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .accept-btn {
@@ -338,7 +395,6 @@ body {
 
 .accept-btn:hover:not(:disabled) {
   background: #218838;
-  transform: translateY(-1px);
 }
 
 .reject-btn {
@@ -348,7 +404,6 @@ body {
 
 .reject-btn:hover:not(:disabled) {
   background: #c82333;
-  transform: translateY(-1px);
 }
 
 .prepare-btn {
@@ -358,7 +413,6 @@ body {
 
 .prepare-btn:hover:not(:disabled) {
   background: #e67e22;
-  transform: translateY(-1px);
 }
 
 .delivery-btn {
@@ -368,7 +422,6 @@ body {
 
 .delivery-btn:hover:not(:disabled) {
   background: #5a32a3;
-  transform: translateY(-1px);
 }
 
 .delivered-btn {
@@ -378,15 +431,38 @@ body {
 
 .delivered-btn:hover:not(:disabled) {
   background: #1ea085;
-  transform: translateY(-1px);
 }
 
-.action-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* Empty State (Used in Orders and Menu Tabs) */
+.empty-state {
+  text-align: center;
+  background: white;
+  padding: 60px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease-out;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-/* Menu Tab */
+.empty-icon {
+  font-size: 4em;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  font-size: 1.5em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #6c757d;
+  font-size: 1.1em;
+}
+
+/* Menu Tab Styles */
 .menu-form {
   background: white;
   border-radius: 12px;
@@ -409,13 +485,16 @@ body {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1em;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+  transform: translateY(-1px);
 }
 
 .add-btn {
@@ -428,11 +507,13 @@ body {
   font-size: 1em;
   font-weight: 600;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
 }
 
 .add-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  background: linear-gradient(135deg, #218838, #1ea085);
 }
 
 .menu-list {
@@ -447,6 +528,8 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   border-left: 4px solid #28a745;
+  display: flex;
+  align-items: center;
 }
 
 .menu-item-card:hover {
@@ -460,6 +543,7 @@ body {
   grid-template-columns: 2fr 1fr auto;
   gap: 15px;
   align-items: center;
+  width: 100%;
 }
 
 .edit-mode input {
@@ -467,6 +551,15 @@ body {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 0.95em;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.edit-mode input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
 }
 
 .edit-actions {
@@ -485,6 +578,8 @@ body {
   font-size: 0.9em;
   font-weight: 600;
   transition: all 0.3s ease;
+  min-width: 60px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .save-btn,
@@ -497,6 +592,7 @@ body {
 .edit-item-btn:hover {
   background: #2980b9;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
 }
 
 .cancel-btn,
@@ -509,18 +605,24 @@ body {
 .delete-item-btn:hover {
   background: #5a6268;
   transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
 }
 
 .item-details h4 {
   margin: 0 0 5px 0;
   color: #2c3e50;
   font-size: 1.2em;
+  font-weight: 600;
 }
 
 .item-price {
   color: #27ae60;
   font-weight: bold;
   font-size: 1.1em;
+  background: #d4edda;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .item-actions {
@@ -529,13 +631,17 @@ body {
   justify-content: flex-end;
 }
 
-/* Profile Tab */
+/* src/styles/RestaurantDashboard.css - Part 2: Profile Tab to Responsive */
+
+/* Profile Tab Styles */
 .profile-form {
   background: white;
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   max-width: 500px;
+  margin: 0 auto;
+  animation: slideInUp 0.5s ease-out;
 }
 
 .profile-form .form-group {
@@ -553,17 +659,19 @@ body {
 .profile-form input {
   width: 100%;
   padding: 12px;
-  padding-left:60px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1em;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
 }
 
 .profile-form input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+  transform: translateY(-1px);
 }
 
 .save-profile-btn {
@@ -577,14 +685,190 @@ body {
   font-size: 1.1em;
   font-weight: 600;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  margin-top: 10px;
 }
 
 .save-profile-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
 }
 
-/* Analytics Tab */
+/* Image Upload Section (Within Profile Tab) */
+.image-upload-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  animation: slideInUp 0.5s ease-out;
+  text-align: center;
+}
+
+.image-upload-section h3 {
+  color: #2c3e50;
+  font-size: 1.3em;
+  margin-bottom: 15px;
+}
+
+.current-image-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.uploaded-logo {
+  width: 120px; /* Small size as requested */
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover; /* Prevents distortion, crops if needed */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.uploaded-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.no-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120px; /* Matches uploaded-logo for consistency */
+  height: 120px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.no-image-placeholder:hover {
+  border-color: #667eea;
+  background: #e3f2fd;
+  transform: scale(1.02);
+}
+
+.no-image-placeholder svg { /* For FaCamera icon */
+  font-size: 2.5em;
+  margin-bottom: 5px;
+  opacity: 0.7;
+  color: #6c757d;
+}
+
+.no-image-placeholder p {
+  font-size: 0.85em;
+  margin: 0;
+  text-align: center;
+  color: #6c757d;
+}
+
+.upload-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+#imageUpload {
+  display: none; /* Hide native file input; use custom label */
+}
+
+.file-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-input-label:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+.file-input-label svg { /* For FaUpload icon */
+  font-size: 1.1em;
+}
+
+.file-input-label:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-upload {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-upload:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  background: linear-gradient(135deg, #218838, #1ea085);
+}
+
+.btn-upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.upload-status {
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: 500;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  animation: bounceIn 0.5s ease-out;
+  max-width: 100%;
+}
+
+.upload-status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.upload-status.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Analytics Tab Styles */
 .analytics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -644,7 +928,103 @@ body {
   border-radius: 4px;
 }
 
-/* Empty State */
+/* Delete Confirmation Modal (For Menu Tab Delete Action) */
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.delete-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideInUp 0.3s ease-out;
+  position: relative;
+}
+
+.delete-modal h3 {
+  color: #dc3545;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.delete-modal p {
+  color: #6c757d;
+  margin-bottom: 25px;
+  line-height: 1.5;
+  font-size: 1em;
+}
+
+.delete-modal .item-name {
+  font-weight: 600;
+  color: #2c3e50;
+  background: #fff3cd;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-confirm-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.modal-confirm-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.modal-cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.modal-cancel-btn:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+/* Enhanced Empty State (For Profile/Analytics if No Data) */
 .empty-state {
   text-align: center;
   background: white;
@@ -652,6 +1032,8 @@ body {
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   animation: fadeIn 0.5s ease-out;
+  max-width: 400px;
+  margin: 0 auto 20px;
 }
 
 .empty-icon {
@@ -671,7 +1053,7 @@ body {
   font-size: 1.1em;
 }
 
-/* Responsive Design */
+/* Responsive Design (Applies to All Tabs) */
 @media (max-width: 1024px) {
   .sidebar {
     width: 200px;
@@ -679,6 +1061,17 @@ body {
 
   .main-content {
     padding: 20px;
+  }
+
+  .uploaded-logo,
+  .no-image-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+
+  .analytics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
   }
 }
 
@@ -690,18 +1083,34 @@ body {
   .sidebar {
     width: 100%;
     order: 2;
+    min-height: auto;
+  }
+
+  .sidebar-header {
+    padding: 15px;
   }
 
   .sidebar-nav {
     display: flex;
     overflow-x: auto;
     padding: 10px;
+    flex-direction: row;
+    justify-content: flex-start;
   }
 
   .nav-item {
     white-space: nowrap;
     flex-shrink: 0;
     margin-right: 10px;
+    padding: 10px 15px;
+    border-radius: 20px;
+    min-width: auto;
+  }
+
+  .nav-item.active,
+  .nav-item:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
   }
 
   .main-content {
@@ -711,11 +1120,22 @@ body {
 
   .section-title {
     font-size: 1.5em;
+    flex-wrap: wrap;
   }
 
   .menu-form {
     grid-template-columns: 1fr;
     gap: 15px;
+  }
+
+  .edit-mode,
+  .view-mode {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .item-actions {
+    justify-content: center;
   }
 
   .order-header {
@@ -730,5 +1150,105 @@ body {
 
   .action-btn {
     width: 100%;
+    min-width: auto;
+  }
+
+  .profile-form {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .image-upload-section {
+    padding: 15px;
+  }
+
+  .upload-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .file-input-label,
+  .btn-upload {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .uploaded-logo,
+  .no-image-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+
+  .delete-modal {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-confirm-btn,
+  .modal-cancel-btn {
+    width: 100%;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-value {
+    font-size: 2em;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px;
+  }
+
+  .order-list,
+  .menu-list {
+    gap: 10px;
+  }
+
+  .order-card,
+  .menu-item-card {
+    padding: 15px;
+  }
+
+  .uploaded-logo,
+  .no-image-placeholder {
+    width: 70px;
+    height: 70px;
+  }
+
+  .file-input-label {
+    padding: 8px 16px;
+    font-size: 0.9em;
+  }
+
+  .btn-upload {
+    padding: 10px 20px;
+    font-size: 0.95em;
+  }
+
+  .section-title {
+    font-size: 1.3em;
+  }
+
+  .empty-state {
+    padding: 40px 15px;
+  }
+
+  .empty-icon {
+    font-size: 3em;
   }
 }
