@@ -1,30 +1,35 @@
 import mongoose from "mongoose";
 
 const menuItemSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, trim: true },
-    price: { type: Number, required: true, min: 0 },
-  },
-  { _id: true } // Mongoose generates _id for each menu item
+  {
+    name: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+  },
+  { _id: true } // Mongoose generates _id for each menu item
 );
 
 const restaurantSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true },
-    contact: { type: String },
-    role: {
-      type: String,
-      enum: ["restaurant"],
-      default: "restaurant",
-      lowercase: true,
-      trim: true,
+  {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true },
+    contact: { type: String },
+    role: {
+      type: String,
+      enum: ["restaurant"],
+      default: "restaurant",
+      lowercase: true,
+      trim: true,
+    },
+    address: { type: String, trim: true },
+    // ✅ NEW FIELD: Stores the permanent Cloudinary URL for the restaurant image
+    image: { 
+        type: String, 
+        default: '' 
     },
-    address: { type: String, trim: true },
-    menu: { type: [menuItemSchema], default: [] },
-  },
-  { timestamps: true } // automatically add createdAt and updatedAt
+    menu: { type: [menuItemSchema], default: [] },
+  },
+  { timestamps: true } // automatically add createdAt and updatedAt
 );
 
 const Restaurant = mongoose.model("Restaurant", restaurantSchema);
