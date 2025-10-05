@@ -1,7 +1,6 @@
 import express from "express";
 import Restaurant from "../models/Restaurant.js";
 import { authMiddleware, requireRole } from "../middleware/auth.js";
-import upload from '../middleware/cloudinaryUpload.js'; // ✅ Cloudinary Multer Configuration
 
 const router = express.Router();
 
@@ -51,42 +50,6 @@ router.put("/me", authMiddleware, requireRole("restaurant"), async (req, res) =>
     res.status(500).json({ error: "Server error" });
   }
 });
-
-// ------------------- Upload Restaurant Image (Experiment 9) -------------------
-router.put("/me/image", authMiddleware, requireRole("restaurant"), 
-  upload.single('restaurantImage'), // Multer middleware captures the file
-  async (req, res) => {
-    try {
-      // Multer/Cloudinary saves the file and adds its details to req.file
-      if (!req.file) {
-        return res.status(400).json({ error: "No image file provided." });
-      }
-
-      // req.file.path contains the permanent Cloudinary URL
-      const imageUrl = req.file.path; 
-
-      const updated = await Restaurant.findByIdAndUpdate(
-        req.user.id,
-        { image: imageUrl }, // Save the permanent Cloudinary URL
-        { new: true, runValidators: true }
-      ).select("-password");
-
-      if (!updated) {
-        return res.status(404).json({ error: "Restaurant not found" });
-      }
-      
-      res.json({ 
-        message: "Image uploaded successfully", 
-        image: updated.image // Return the new URL to the frontend
-      });
-
-    } catch (err) {
-      console.error("PUT /me/image error:", err);
-      // Check if the error is due to Multer limits (like file size)
-      res.status(500).json({ error: err.message || "Server error during file upload" });
-    }
-});
-
 
 // ✅ Add menu item
 router.post("/me/menu", authMiddleware, requireRole("restaurant"), async (req, res) => {
