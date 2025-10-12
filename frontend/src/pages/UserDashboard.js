@@ -24,28 +24,20 @@ function UserDashboard() {
 
   // ---------------- Load User Profile ----------------
   const fetchUserProfile = useCallback(async () => {
-    try {
-      const profile = await getProfile();
-
-      if (!profile.success) {
-        console.warn("Failed to fetch profile:", profile.error);
-        navigate("/login");
-        return;
-      }
-
-      setUser({
-        name: profile.name || "Guest",
-        email: profile.email || "guest@example.com",
-        role: profile.role,
-        id: profile._id,
-      });
-
-      if (profile.role) localStorage.setItem("role", profile.role);
-      if (profile._id) localStorage.setItem("accountId", profile._id);
-    } catch (err) {
-      console.error("fetchUserProfile error:", err);
+    const profile = await getProfile();
+    if (!profile.success) {
+      console.warn("Failed to fetch profile:", profile.error);
       navigate("/login");
+      return;
     }
+    setUser({
+      name: profile.name || "Guest",
+      email: profile.email || "guest@example.com",
+      role: profile.role,
+      id: profile._id,
+    });
+    if (profile.role) localStorage.setItem("role", profile.role);
+    if (profile._id) localStorage.setItem("accountId", profile._id);
   }, [navigate]);
 
   useEffect(() => {
@@ -56,22 +48,17 @@ function UserDashboard() {
   const fetchRestaurantsData = useCallback(async () => {
     setLoading(true);
     setError("");
-    try {
-      const data = await fetchAllRestaurants();
-      if (!data.success && data.error) {
-        setError(data.error);
-        setRestaurants([]);
-        setFilteredRestaurants([]);
-      } else {
-        setRestaurants(data || []);
-        setFilteredRestaurants(data || []);
-      }
-    } catch (err) {
-      console.error("fetchRestaurantsData error:", err);
-      setError(err.message || "Failed to fetch restaurants");
-    } finally {
-      setLoading(false);
+    const res = await fetchAllRestaurants();
+    if (!res.success) {
+      setError(res.error || "Failed to fetch restaurants");
+      setRestaurants([]);
+      setFilteredRestaurants([]);
+    } else {
+      const list = res.data || [];
+      setRestaurants(list);
+      setFilteredRestaurants(list);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -81,14 +68,15 @@ function UserDashboard() {
   // ---------------- Filter Restaurants ----------------
   useEffect(() => {
     const term = searchTerm.toLowerCase();
-    const filtered = restaurants.filter(
-      (r) =>
-        (r.name || "").toLowerCase().includes(term) ||
-        (r.type || "").toLowerCase().includes(term) ||
-        (r.location || "").toLowerCase().includes(term) ||
-        (r.address || "").toLowerCase().includes(term)
+    setFilteredRestaurants(
+      restaurants.filter(
+        (r) =>
+          (r.name || "").toLowerCase().includes(term) ||
+          (r.type || "").toLowerCase().includes(term) ||
+          (r.location || "").toLowerCase().includes(term) ||
+          (r.address || "").toLowerCase().includes(term)
+      )
     );
-    setFilteredRestaurants(filtered);
   }, [searchTerm, restaurants]);
 
   // ---------------- Logout ----------------
@@ -125,7 +113,7 @@ function UserDashboard() {
   };
 
   return (
-    <div>
+    <div className="dashboard-wrapper">
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
@@ -153,12 +141,10 @@ function UserDashboard() {
           </div>
 
           {/* Orders Button */}
-          {user && user.role === "user" && (
-            <div className="orders-btn-wrapper">
-              <Link to="/user/orders">
-                <button className="btn orders-btn">My Orders</button>
-              </Link>
-            </div>
+          {user?.role === "user" && (
+            <Link to="/user/orders">
+              <button className="btn orders-btn">My Orders</button>
+            </Link>
           )}
 
           {/* User Profile Dropdown */}

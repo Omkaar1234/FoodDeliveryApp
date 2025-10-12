@@ -32,7 +32,14 @@ export async function loginUser(email, password) {
     if (data.role) localStorage.setItem("role", data.role);
     if (data.accountId) localStorage.setItem("accountId", data.accountId);
 
-    return { success: true, data };
+    // Return normalized data
+    return {
+      success: true,
+      token: data.token,
+      role: data.role,
+      accountId: data.accountId,
+      user: data.user || { _id: data.accountId, role: data.role, name: data.name, email: data.email }
+    };
   } catch (err) {
     console.error("Login service error:", err);
     return { success: false, error: "Server error" };
@@ -49,12 +56,9 @@ export async function registerUser(userData) {
     });
 
     const data = await parseJSON(response);
+    if (!response.ok) return { success: false, error: data.error || "User registration failed" };
 
-    if (!response.ok) {
-      return { success: false, error: data.error || "User registration failed" };
-    }
-
-    return { success: true, data };
+    return { success: true, user: data };
   } catch (err) {
     console.error("Register user error:", err);
     return { success: false, error: "Server error" };
@@ -71,12 +75,9 @@ export async function registerRestaurant(restaurantData) {
     });
 
     const data = await parseJSON(response);
+    if (!response.ok) return { success: false, error: data.error || "Restaurant registration failed" };
 
-    if (!response.ok) {
-      return { success: false, error: data.error || "Restaurant registration failed" };
-    }
-
-    return { success: true, data };
+    return { success: true, user: data };
   } catch (err) {
     console.error("Register restaurant error:", err);
     return { success: false, error: "Server error" };
@@ -88,10 +89,7 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token) {
-    return { success: false, error: "No token found; please login again." };
-  }
-
+  if (!token) return { success: false, error: "No token found; please login again." };
   if (requiredRole && role?.toLowerCase() !== requiredRole.toLowerCase()) {
     return { success: false, error: "Forbidden: Insufficient role" };
   }
@@ -111,16 +109,11 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
     const data = await parseJSON(response);
 
     if (response.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("accountId");
+      localStorage.clear();
       return { success: false, error: "Unauthorized. Please login again." };
     }
 
-    if (!response.ok) {
-      return { success: false, error: data.error || "Request failed" };
-    }
+    if (!response.ok) return { success: false, error: data.error || "Request failed" };
 
     return { success: true, data };
   } catch (err) {
@@ -131,16 +124,16 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
 
 // ---------------- GET PROFILE ----------------
 export const getProfile = async () => {
-  const data = await authFetch("/profile");
-  if (!data.success) return { success: false, error: data.error || "Failed to fetch profile" };
-  return data;
+  const res = await authFetch("/profile");
+  if (!res.success) return { success: false, error: res.error || "Failed to fetch profile" };
+  return { success: true, ...res.data };
 };
 
 // ---------------- UPDATE PROFILE ----------------
 export const updateProfile = async (profileData) => {
-  const data = await authFetch("/profile", { method: "PUT", body: profileData });
-  if (!data.success) return { success: false, error: data.error || "Failed to update profile" };
-  return data;
+  const res = await authFetch("/profile", { method: "PUT", body: profileData });
+  if (!res.success) return { success: false, error: res.error || "Failed to update profile" };
+  return { success: true, ...res.data };
 };
 
 // ---------------- FETCH ALL RESTAURANTS (PUBLIC) ----------------
@@ -148,9 +141,7 @@ export const fetchAllRestaurants = async () => {
   try {
     const res = await fetch(`${API_URL}/restaurants`);
     const data = await parseJSON(res);
-
     if (!res.ok) return { success: false, data: [], error: data.error || "Failed to fetch restaurants" };
-
     return { success: true, data };
   } catch (err) {
     console.error("fetchAllRestaurants error:", err);
