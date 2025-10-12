@@ -26,7 +26,12 @@ function UserDashboard() {
   const fetchUserProfile = useCallback(async () => {
     try {
       const profile = await getProfile();
-      if (!profile || profile.error) throw new Error(profile.error || "Failed to fetch profile");
+
+      if (!profile.success) {
+        console.warn("Failed to fetch profile:", profile.error);
+        navigate("/login");
+        return;
+      }
 
       setUser({
         name: profile.name || "Guest",
@@ -53,8 +58,14 @@ function UserDashboard() {
     setError("");
     try {
       const data = await fetchAllRestaurants();
-      setRestaurants(data || []);
-      setFilteredRestaurants(data || []);
+      if (!data.success && data.error) {
+        setError(data.error);
+        setRestaurants([]);
+        setFilteredRestaurants([]);
+      } else {
+        setRestaurants(data || []);
+        setFilteredRestaurants(data || []);
+      }
     } catch (err) {
       console.error("fetchRestaurantsData error:", err);
       setError(err.message || "Failed to fetch restaurants");
@@ -217,41 +228,37 @@ function UserDashboard() {
               ))}
             </div>
           </div>
-        ) : (
-          <>
-            {loading ? (
-              <p>Loading restaurants...</p>
-            ) : error ? (
-              <p className="error">{error}</p>
-            ) : filteredRestaurants.length > 0 ? (
-              <div className="restaurant-list">
-                {filteredRestaurants.map((r) => (
-                  <div key={r._id} className="restaurant-card">
-                    <img
-                      src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
-                      alt={r.name}
-                      className="restaurant-image"
-                    />
-                    <div className="restaurant-info">
-                      <h3>{r.name}</h3>
-                      <p className="small-text">
-                        {r.type || "Restaurant"} | {r.address || "N/A"}
-                      </p>
-                      <p className="rating">{renderStars(r.rating)}</p>
-                      <button
-                        className="view-menu-btn"
-                        onClick={() => navigate(`/restaurant/${r._id}`)}
-                      >
-                        View Menu
-                      </button>
-                    </div>
-                  </div>
-                ))}
+        ) : loading ? (
+          <p>Loading restaurants...</p>
+        ) : error ? (
+          <p className="error">{error}</p>
+        ) : filteredRestaurants.length > 0 ? (
+          <div className="restaurant-list">
+            {filteredRestaurants.map((r) => (
+              <div key={r._id} className="restaurant-card">
+                <img
+                  src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
+                  alt={r.name}
+                  className="restaurant-image"
+                />
+                <div className="restaurant-info">
+                  <h3>{r.name}</h3>
+                  <p className="small-text">
+                    {r.type || "Restaurant"} | {r.address || "N/A"}
+                  </p>
+                  <p className="rating">{renderStars(r.rating)}</p>
+                  <button
+                    className="view-menu-btn"
+                    onClick={() => navigate(`/restaurant/${r._id}`)}
+                  >
+                    View Menu
+                  </button>
+                </div>
               </div>
-            ) : (
-              <p>No restaurants found for "{searchTerm}"</p>
-            )}
-          </>
+            ))}
+          </div>
+        ) : (
+          <p>No restaurants found for "{searchTerm}"</p>
         )}
 
         {/* AI Search Trigger */}

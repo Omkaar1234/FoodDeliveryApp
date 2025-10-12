@@ -1,10 +1,9 @@
-// src/services/authService.js
 const API_URL = process.env.REACT_APP_API_URL;
 
 // ---------------- Helper ----------------
 const parseJSON = async (res) => {
   const text = await res.text();
-  if (!text) return {}; // handle empty response
+  if (!text) return {};
   try {
     return JSON.parse(text);
   } catch {
@@ -33,7 +32,7 @@ export async function loginUser(email, password) {
     if (data.role) localStorage.setItem("role", data.role);
     if (data.accountId) localStorage.setItem("accountId", data.accountId);
 
-    return { success: true, ...data };
+    return { success: true, data };
   } catch (err) {
     console.error("Login service error:", err);
     return { success: false, error: "Server error" };
@@ -55,7 +54,7 @@ export async function registerUser(userData) {
       return { success: false, error: data.error || "User registration failed" };
     }
 
-    return { success: true, ...data };
+    return { success: true, data };
   } catch (err) {
     console.error("Register user error:", err);
     return { success: false, error: "Server error" };
@@ -77,7 +76,7 @@ export async function registerRestaurant(restaurantData) {
       return { success: false, error: data.error || "Restaurant registration failed" };
     }
 
-    return { success: true, ...data };
+    return { success: true, data };
   } catch (err) {
     console.error("Register restaurant error:", err);
     return { success: false, error: "Server error" };
@@ -89,68 +88,72 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token) throw new Error("No token found; please login again.");
-  if (requiredRole && role?.toLowerCase() !== requiredRole.toLowerCase()) {
-    throw new Error("Forbidden: Insufficient role");
+  if (!token) {
+    return { success: false, error: "No token found; please login again." };
   }
 
-  const { body, ...rest } = options;
+  if (requiredRole && role?.toLowerCase() !== requiredRole.toLowerCase()) {
+    return { success: false, error: "Forbidden: Insufficient role" };
+  }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...rest,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(body ? { "Content-Type": "application/json" } : {}),
-      ...(options.headers || {}),
-    },
-    ...(body ? { body: typeof body === "string" ? body : JSON.stringify(body) } : {}),
-  });
+  try {
+    const { body, ...rest } = options;
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...rest,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(options.headers || {}),
+      },
+      ...(body ? { body: typeof body === "string" ? body : JSON.stringify(body) } : {}),
+    });
 
-  const data = await parseJSON(response);
+    const data = await parseJSON(response);
 
-  if (!response.ok) throw new Error(data.error || "Request failed");
-  return data;
+    if (response.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("accountId");
+      return { success: false, error: "Unauthorized. Please login again." };
+    }
+
+    if (!response.ok) {
+      return { success: false, error: data.error || "Request failed" };
+    }
+
+    return { success: true, data };
+  } catch (err) {
+    console.error("authFetch error:", err);
+    return { success: false, error: "Server error" };
+  }
 };
 
 // ---------------- GET PROFILE ----------------
 export const getProfile = async () => {
-  try {
-    // ✅ Backend provides one endpoint: /api/profile
-    const data = await authFetch("/profile");
-
-    if (!data.success) {
-      return { success: false, error: data.error || "Failed to fetch profile" };
-    }
-
-    return data; // returns { success: true, _id, name, email, role }
-  } catch (err) {
-    console.error("Get profile error:", err);
-    return { success: false, error: err.message || "Server error" };
-  }
+  const data = await authFetch("/profile");
+  if (!data.success) return { success: false, error: data.error || "Failed to fetch profile" };
+  return data;
 };
 
 // ---------------- UPDATE PROFILE ----------------
 export const updateProfile = async (profileData) => {
-  try {
-    // ✅ Same endpoint for both roles
-    return await authFetch("/profile", { method: "PUT", body: profileData });
-  } catch (err) {
-    console.error("Update profile error:", err);
-    return { success: false, error: err.message || "Server error" };
-  }
+  const data = await authFetch("/profile", { method: "PUT", body: profileData });
+  if (!data.success) return { success: false, error: data.error || "Failed to update profile" };
+  return data;
 };
-
-
 
 // ---------------- FETCH ALL RESTAURANTS (PUBLIC) ----------------
 export const fetchAllRestaurants = async () => {
   try {
     const res = await fetch(`${API_URL}/restaurants`);
     const data = await parseJSON(res);
-    if (!res.ok) throw new Error(data.error || "Failed to fetch restaurants");
-    return data;
+
+    if (!res.ok) return { success: false, data: [], error: data.error || "Failed to fetch restaurants" };
+
+    return { success: true, data };
   } catch (err) {
     console.error("fetchAllRestaurants error:", err);
-    return [];
+    return { success: false, data: [], error: "Server error" };
   }
 };
