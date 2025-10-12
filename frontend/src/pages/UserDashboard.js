@@ -187,6 +187,9 @@ function UserDashboard() {
       {/* Dashboard Content */}
       <div className="dashboard-content">
         <h2>Welcome, {user ? user.name : "Guest"}!</h2>
+        <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
+          🍔 AI Mood Search
+        </button>
         <p>Browse restaurants and explore delicious food.</p>
 
         {aiLoading ? (
@@ -242,10 +245,6 @@ function UserDashboard() {
         ) : (
           <p>No restaurants found for "{searchTerm}"</p>
         )}
-
-        <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
-          🍔 AI Mood Search
-        </button>
       </div>
     </div>
   );
