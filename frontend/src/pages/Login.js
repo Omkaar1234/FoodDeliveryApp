@@ -18,21 +18,21 @@ function Login() {
     try {
       const response = await loginUser(email, password);
 
-      // ✅ normalize response
+      // ✅ Ensure token, role, and accountId are at top level
       const token = response.token || response?.data?.token;
-      const role = response.role || response?.user?.role;
-      const accountId = response.accountId || response?.user?._id;
+      const role = response.role || response?.data?.role;
+      const accountId = response.accountId || response?.data?.accountId;
 
-      if (token && role) {
+      if (token && role && accountId) {
         // Save in localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("role", role);
         localStorage.setItem("accountId", accountId);
 
         // Navigate based on role
-        if (role === "restaurant") {
+        if (role.toLowerCase() === "restaurant") {
           navigate("/restaurant/dashboard");
-        } else if (role === "user") {
+        } else if (role.toLowerCase() === "user") {
           navigate("/user/dashboard");
         } else {
           setMessage("Invalid role. Please contact support.");
