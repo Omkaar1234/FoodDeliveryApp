@@ -12,6 +12,7 @@ import restaurantRoutes from "./routes/restaurantRoutes.js";
 import restaurantOrdersRoutes from "./routes/restaurantOrderRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import moodRoutes from "./routes/moodRoutes.js"; // AI mood filter route
 
 dotenv.config();
 const app = express();
@@ -20,14 +21,13 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", // for local testing
-      "https://yumexpress.vercel.app", // your frontend URL
+      "http://localhost:3000", // local frontend
+      "https://yumexpress.vercel.app", // deployed frontend
     ],
     credentials: true,
   })
 );
 
-// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -44,21 +44,19 @@ app.use("/api/auth", authRoutes);
 app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/restaurant/orders", restaurantOrdersRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api", userRoutes);
+app.use("/api/users", userRoutes); // ✅ changed from "/api" to "/api/users"
+app.use("/api/ai", moodRoutes);    // ✅ AI route stays here
 
-// Test route
-// app.get("/api/test", (req, res) =>
-//   res.json({ success: true, message: "Backend is running fine 🚀" })
-// );
-
-// ------------------- SERVE FRONTEND (for production) -------------------
+// ------------------- SERVE FRONTEND (PRODUCTION) -------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // if (process.env.NODE_ENV === "production") {
 //   const buildPath = path.join(__dirname, "client", "build");
 //   app.use(express.static(buildPath));
-//   app.get("*", (req, res) => res.sendFile(path.join(buildPath, "index.html")));
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.join(buildPath, "index.html"));
+//   });
 // }
 
 // ------------------- DATABASE CONNECTION -------------------

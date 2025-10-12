@@ -6,6 +6,7 @@ const foodItemSchema = new mongoose.Schema({
   category: { type: String, required: true }, // e.g., Pizza, Burger
   description: { type: String },
   image: { type: String }, // store image URL
+  mood: { type: String, default: "" } // new field
 });
 
 const FoodItem = mongoose.model("FoodItem", foodItemSchema);

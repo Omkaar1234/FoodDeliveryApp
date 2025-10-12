@@ -14,6 +14,11 @@ function UserDashboard() {
   const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [moodInput, setMoodInput] = useState("");
+  const [aiResults, setAIResults] = useState([]);
+  const [aiLoading, setAILoading] = useState(false);
+
   const navigate = useNavigate();
   const { cartItems } = useContext(CartContext);
 
@@ -30,7 +35,6 @@ function UserDashboard() {
         id: profile._id,
       });
 
-      // Save to localStorage
       if (profile.role) localStorage.setItem("role", profile.role);
       if (profile._id) localStorage.setItem("accountId", profile._id);
     } catch (err) {
@@ -86,6 +90,27 @@ function UserDashboard() {
   const renderStars = (count = 0) => {
     const validCount = Math.min(Math.max(Number(count) || 0, 0), 5);
     return "★".repeat(validCount) + "☆".repeat(5 - validCount);
+  };
+
+  // ---------------- AI Mood Search ----------------
+  const handleAISearch = async () => {
+    if (!moodInput) return;
+    setAILoading(true);
+    try {
+      const res = await fetch("/api/ai/filter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: moodInput }),
+      });
+      const data = await res.json();
+      setAIResults(data.items || []);
+      setShowAIModal(false);
+    } catch (err) {
+      console.error("AI search error:", err);
+      setAIResults([]);
+    } finally {
+      setAILoading(false);
+    }
   };
 
   return (
@@ -144,43 +169,95 @@ function UserDashboard() {
         </div>
       </nav>
 
+      {/* AI Mood Search Modal */}
+      {showAIModal && (
+        <div className="ai-modal">
+          <div className="ai-modal-content">
+            <h3>Find food by your mood</h3>
+            <input
+              type="text"
+              placeholder="How are you feeling?"
+              value={moodInput}
+              onChange={(e) => setMoodInput(e.target.value)}
+            />
+            <div className="ai-modal-buttons">
+              <button onClick={handleAISearch}>Search</button>
+              <button onClick={() => setShowAIModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Dashboard Content */}
       <div className="dashboard-content">
         <h2>Welcome, {user ? user.name : "Guest"}!</h2>
         <p>Browse restaurants and explore delicious food.</p>
 
-        {loading ? (
-          <p>Loading restaurants...</p>
-        ) : error ? (
-          <p className="error">{error}</p>
-        ) : filteredRestaurants.length > 0 ? (
-          <div className="restaurant-list">
-            {filteredRestaurants.map((r) => (
-              <div key={r._id} className="restaurant-card">
-                <img
-                  src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
-                  alt={r.name}
-                  className="restaurant-image"
-                />
-                <div className="restaurant-info">
-                  <h3>{r.name}</h3>
-                  <p className="small-text">
-                    {r.type || "Restaurant"} | {r.address || "N/A"}
-                  </p>
-                  <p className="rating">{renderStars(r.rating)}</p>
-                  <button
-                    className="view-menu-btn"
-                    onClick={() => navigate(`/restaurant/${r._id}`)}
-                  >
-                    View Menu
-                  </button>
+        {/* AI Filtered Items */}
+        {aiLoading ? (
+          <p>Loading AI results...</p>
+        ) : aiResults.length > 0 ? (
+          <div>
+            <h3>Recommended for your mood:</h3>
+            <div className="restaurant-list">
+              {aiResults.map((item) => (
+                <div key={item._id} className="restaurant-card">
+                  <img
+                    src={item.image || "https://via.placeholder.com/400x250?text=Food"}
+                    alt={item.name}
+                    className="restaurant-image"
+                  />
+                  <div className="restaurant-info">
+                    <h3>{item.name}</h3>
+                    <p className="small-text">{item.category || "Food"}</p>
+                    <p className="rating">{renderStars(item.rating)}</p>
+                    <p>₹{item.price}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : (
-          <p>No restaurants found for "{searchTerm}"</p>
+          <>
+            {loading ? (
+              <p>Loading restaurants...</p>
+            ) : error ? (
+              <p className="error">{error}</p>
+            ) : filteredRestaurants.length > 0 ? (
+              <div className="restaurant-list">
+                {filteredRestaurants.map((r) => (
+                  <div key={r._id} className="restaurant-card">
+                    <img
+                      src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
+                      alt={r.name}
+                      className="restaurant-image"
+                    />
+                    <div className="restaurant-info">
+                      <h3>{r.name}</h3>
+                      <p className="small-text">
+                        {r.type || "Restaurant"} | {r.address || "N/A"}
+                      </p>
+                      <p className="rating">{renderStars(r.rating)}</p>
+                      <button
+                        className="view-menu-btn"
+                        onClick={() => navigate(`/restaurant/${r._id}`)}
+                      >
+                        View Menu
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No restaurants found for "{searchTerm}"</p>
+            )}
+          </>
         )}
+
+        {/* AI Search Trigger */}
+        <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
+          🍔 AI Mood Search
+        </button>
       </div>
     </div>
   );
