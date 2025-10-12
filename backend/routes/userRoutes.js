@@ -1,4 +1,3 @@
-// routes/userRoutes.js
 import express from "express";
 import { authMiddleware } from "../middleware/auth.js";
 import User from "../models/User.js";
@@ -7,7 +6,7 @@ import Restaurant from "../models/Restaurant.js";
 const router = express.Router();
 
 /**
- * @route   GET /api/profile
+ * @route   GET /users/profile
  * @desc    Get logged-in account profile (User OR Restaurant)
  * @access  Private
  */
@@ -39,7 +38,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
 });
 
 /**
- * @route   PUT /api/profile
+ * @route   PUT /users/profile
  * @desc    Update profile (User OR Restaurant)
  * @access  Private
  */

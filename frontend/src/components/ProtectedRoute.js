@@ -6,50 +6,43 @@ import { Navigate } from "react-router-dom";
  * ProtectedRoute ensures:
  * 1. User has a valid JWT token in localStorage
  * 2. Optionally matches a required role ("user" or "restaurant")
- * 
- * Usage:
- * <ProtectedRoute requiredRole="user">
- *    <UserDashboard />
- * </ProtectedRoute>
  */
 function ProtectedRoute({ children, requiredRole }) {
   const token = localStorage.getItem("token");
+  const storedRole = localStorage.getItem("role"); // fallback role
 
   if (!token) {
-    // No token → redirect to login
     return <Navigate to="/login" replace />;
   }
+
+  let payload = null;
 
   try {
-    // Decode JWT payload (header.payload.signature)
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const now = Date.now() / 1000; // Current time in seconds
-
-    // Check token expiration
-    if (payload.exp && payload.exp < now) {
-      localStorage.clear(); // Token expired
-      return <Navigate to="/login" replace />;
-    }
-
-    // Check required role if provided
-    if (requiredRole && payload.role?.toLowerCase() !== requiredRole.toLowerCase()) {
-      // Role mismatch → redirect to correct dashboard
-      if (payload.role?.toLowerCase() === "restaurant") {
-        return <Navigate to="/restaurant/dashboard" replace />;
-      }
-      if (payload.role?.toLowerCase() === "user") {
-        return <Navigate to="/user/dashboard" replace />;
-      }
-      // Unknown role → redirect to login
-      return <Navigate to="/login" replace />;
-    }
+    const base64Payload = token.split(".")[1];
+    if (!base64Payload) throw new Error("Invalid token format");
+    payload = JSON.parse(atob(base64Payload));
   } catch (err) {
     console.error("Invalid token:", err);
-    localStorage.clear(); // Invalid token
+    localStorage.clear();
     return <Navigate to="/login" replace />;
   }
 
-  // Token is valid and role matches → render children
+  const now = Date.now() / 1000;
+  if (payload.exp && payload.exp < now) {
+    localStorage.clear();
+    return <Navigate to="/login" replace />;
+  }
+
+  const userRole = payload.role || storedRole || "";
+
+  if (requiredRole && userRole.toLowerCase() !== requiredRole.toLowerCase()) {
+    // Redirect to correct dashboard
+    if (userRole.toLowerCase() === "restaurant") return <Navigate to="/restaurant/dashboard" replace />;
+    if (userRole.toLowerCase() === "user") return <Navigate to="/user/dashboard" replace />;
+
+    return <Navigate to="/login" replace />; // Unknown role
+  }
+
   return children;
 }
 

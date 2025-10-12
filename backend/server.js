@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -11,8 +10,8 @@ import authRoutes from "./routes/authRoutes.js";
 import restaurantRoutes from "./routes/restaurantRoutes.js";
 import restaurantOrdersRoutes from "./routes/restaurantOrderRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import moodRoutes from "./routes/moodRoutes.js"; // AI mood filter route
+import userRoutes from "./routes/userRoutes.js";   // ✅ user routes
+import moodRoutes from "./routes/moodRoutes.js";   // AI mood filter
 
 dotenv.config();
 const app = express();
@@ -21,8 +20,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", // local frontend
-      "https://yumexpress.vercel.app", // deployed frontend
+      "http://localhost:3000",
+      "https://yumexpress.vercel.app",
     ],
     credentials: true,
   })
@@ -44,24 +43,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/restaurants", restaurantRoutes);
 app.use("/api/restaurant/orders", restaurantOrdersRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/users", userRoutes); // ✅ changed from "/api" to "/api/users"
-app.use("/api/ai", moodRoutes);    // ✅ AI route stays here
-
-// ------------------- SERVE FRONTEND (PRODUCTION) -------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// if (process.env.NODE_ENV === "production") {
-//   const buildPath = path.join(__dirname, "client", "build");
-//   app.use(express.static(buildPath));
-//   app.get("*", (req, res) => {
-//     res.sendFile(path.join(buildPath, "index.html"));
-//   });
-// }
+app.use("/api/users", userRoutes);  // ✅ mounted at /api/users
+app.use("/api/ai", moodRoutes);
 
 // ------------------- DATABASE CONNECTION -------------------
-const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/yumexpress";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/yumexpress";
 const PORT = process.env.PORT || 5000;
 
 mongoose

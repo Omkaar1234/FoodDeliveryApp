@@ -25,8 +25,12 @@ function UserDashboard() {
   // ---------------- Load User Profile ----------------
   const fetchUserProfile = useCallback(async () => {
     try {
+      // ✅ Use correct endpoint in authService.js
       const profile = await getProfile();
-      if (!profile || profile.error) throw new Error(profile.error || "Failed to fetch profile");
+
+      if (!profile || profile.success === false) {
+        throw new Error(profile.error || "Failed to fetch profile");
+      }
 
       setUser({
         name: profile.name || "Guest",
@@ -39,6 +43,7 @@ function UserDashboard() {
       if (profile._id) localStorage.setItem("accountId", profile._id);
     } catch (err) {
       console.error("fetchUserProfile error:", err);
+      localStorage.clear();
       navigate("/login");
     }
   }, [navigate]);
@@ -70,14 +75,15 @@ function UserDashboard() {
   // ---------------- Filter Restaurants ----------------
   useEffect(() => {
     const term = searchTerm.toLowerCase();
-    const filtered = restaurants.filter(
-      (r) =>
-        (r.name || "").toLowerCase().includes(term) ||
-        (r.type || "").toLowerCase().includes(term) ||
-        (r.location || "").toLowerCase().includes(term) ||
-        (r.address || "").toLowerCase().includes(term)
+    setFilteredRestaurants(
+      restaurants.filter(
+        (r) =>
+          (r.name || "").toLowerCase().includes(term) ||
+          (r.type || "").toLowerCase().includes(term) ||
+          (r.location || "").toLowerCase().includes(term) ||
+          (r.address || "").toLowerCase().includes(term)
+      )
     );
-    setFilteredRestaurants(filtered);
   }, [searchTerm, restaurants]);
 
   // ---------------- Logout ----------------
@@ -114,13 +120,12 @@ function UserDashboard() {
   };
 
   return (
-    <div>
+    <div className="dashboard-wrapper">
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
           <img src={logo} alt="YumExpress" className="logo" />
         </div>
-
         <div className="navbar-center">
           <input
             type="text"
@@ -133,24 +138,18 @@ function UserDashboard() {
             <FaSearch />
           </button>
         </div>
-
         <div className="navbar-right">
-          {/* Cart Icon */}
           <div className="cart-icon" onClick={() => navigate("/cart")}>
             <FaShoppingCart size={24} />
             {cartItems.length > 0 && <span className="cart-count">{cartItems.length}</span>}
           </div>
 
-          {/* Orders Button */}
           {user && user.role === "user" && (
-            <div className="orders-btn-wrapper">
-              <Link to="/user/orders">
-                <button className="btn orders-btn">My Orders</button>
-              </Link>
-            </div>
+            <Link to="/user/orders">
+              <button className="btn orders-btn">My Orders</button>
+            </Link>
           )}
 
-          {/* User Profile Dropdown */}
           <div
             className="user-icon"
             onMouseEnter={() => setShowProfile(true)}
@@ -169,7 +168,7 @@ function UserDashboard() {
         </div>
       </nav>
 
-      {/* AI Mood Search Modal */}
+      {/* AI Modal */}
       {showAIModal && (
         <div className="ai-modal">
           <div className="ai-modal-content">
@@ -193,7 +192,6 @@ function UserDashboard() {
         <h2>Welcome, {user ? user.name : "Guest"}!</h2>
         <p>Browse restaurants and explore delicious food.</p>
 
-        {/* AI Filtered Items */}
         {aiLoading ? (
           <p>Loading AI results...</p>
         ) : aiResults.length > 0 ? (
@@ -217,44 +215,37 @@ function UserDashboard() {
               ))}
             </div>
           </div>
-        ) : (
-          <>
-            {loading ? (
-              <p>Loading restaurants...</p>
-            ) : error ? (
-              <p className="error">{error}</p>
-            ) : filteredRestaurants.length > 0 ? (
-              <div className="restaurant-list">
-                {filteredRestaurants.map((r) => (
-                  <div key={r._id} className="restaurant-card">
-                    <img
-                      src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
-                      alt={r.name}
-                      className="restaurant-image"
-                    />
-                    <div className="restaurant-info">
-                      <h3>{r.name}</h3>
-                      <p className="small-text">
-                        {r.type || "Restaurant"} | {r.address || "N/A"}
-                      </p>
-                      <p className="rating">{renderStars(r.rating)}</p>
-                      <button
-                        className="view-menu-btn"
-                        onClick={() => navigate(`/restaurant/${r._id}`)}
-                      >
-                        View Menu
-                      </button>
-                    </div>
-                  </div>
-                ))}
+        ) : loading ? (
+          <p>Loading restaurants...</p>
+        ) : error ? (
+          <p className="error">{error}</p>
+        ) : filteredRestaurants.length > 0 ? (
+          <div className="restaurant-list">
+            {filteredRestaurants.map((r) => (
+              <div key={r._id} className="restaurant-card">
+                <img
+                  src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
+                  alt={r.name}
+                  className="restaurant-image"
+                />
+                <div className="restaurant-info">
+                  <h3>{r.name}</h3>
+                  <p className="small-text">{r.type || "Restaurant"} | {r.address || "N/A"}</p>
+                  <p className="rating">{renderStars(r.rating)}</p>
+                  <button
+                    className="view-menu-btn"
+                    onClick={() => navigate(`/restaurant/${r._id}`)}
+                  >
+                    View Menu
+                  </button>
+                </div>
               </div>
-            ) : (
-              <p>No restaurants found for "{searchTerm}"</p>
-            )}
-          </>
+            ))}
+          </div>
+        ) : (
+          <p>No restaurants found for "{searchTerm}"</p>
         )}
 
-        {/* AI Search Trigger */}
         <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
           🍔 AI Mood Search
         </button>
