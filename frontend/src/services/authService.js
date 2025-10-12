@@ -103,8 +103,8 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
 // ---------------- GET PROFILE ----------------
 export const getProfile = async () => {
   try {
-    const res = await authFetch("/users/profile"); // ✅ Correct path
-    if (!res.success) return { success: false, error: res.error || "Failed to fetch profile" };
+    const res = await authFetch("/users/profile");
+    if (!res || res.success === false) return { success: false, error: res.error || "Failed to fetch profile" };
     return { success: true, ...res };
   } catch (err) {
     console.error("Get profile error:", err);
@@ -115,7 +115,8 @@ export const getProfile = async () => {
 // ---------------- UPDATE PROFILE ----------------
 export const updateProfile = async (profileData) => {
   try {
-    return await authFetch("/users/profile", { method: "PUT", body: profileData }); // ✅ Correct path
+    const res = await authFetch("/users/profile", { method: "PUT", body: profileData });
+    return res;
   } catch (err) {
     console.error("Update profile error:", err);
     return { success: false, error: err.message || "Server error" };
@@ -127,8 +128,11 @@ export const fetchAllRestaurants = async () => {
   try {
     const res = await fetch(`${API_URL}/restaurants`);
     const data = await parseJSON(res);
-    if (!res.ok) return { success: false, data: [], error: data.error || "Failed to fetch restaurants" };
-    return { success: true, data };
+
+    // Always return array in data
+    const restaurants = Array.isArray(data) ? data : data?.data || [];
+
+    return { success: res.ok, data: restaurants, error: data?.error || (res.ok ? null : "Failed to fetch restaurants") };
   } catch (err) {
     console.error("fetchAllRestaurants error:", err);
     return { success: false, data: [], error: "Server error" };

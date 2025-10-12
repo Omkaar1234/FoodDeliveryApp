@@ -25,9 +25,7 @@ function UserDashboard() {
   // ---------------- Load User Profile ----------------
   const fetchUserProfile = useCallback(async () => {
     try {
-      // ✅ Use correct endpoint in authService.js
       const profile = await getProfile();
-
       if (!profile || profile.success === false) {
         throw new Error(profile.error || "Failed to fetch profile");
       }
@@ -58,8 +56,10 @@ function UserDashboard() {
     setError("");
     try {
       const data = await fetchAllRestaurants();
-      setRestaurants(data || []);
-      setFilteredRestaurants(data || []);
+      // Ensure restaurants is an array
+      const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+      setRestaurants(list);
+      setFilteredRestaurants(list);
     } catch (err) {
       console.error("fetchRestaurantsData error:", err);
       setError(err.message || "Failed to fetch restaurants");
@@ -75,6 +75,7 @@ function UserDashboard() {
   // ---------------- Filter Restaurants ----------------
   useEffect(() => {
     const term = searchTerm.toLowerCase();
+    if (!Array.isArray(restaurants)) return;
     setFilteredRestaurants(
       restaurants.filter(
         (r) =>
@@ -134,22 +135,18 @@ function UserDashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <button className="search-btn">
-            <FaSearch />
-          </button>
+          <button className="search-btn"><FaSearch /></button>
         </div>
         <div className="navbar-right">
           <div className="cart-icon" onClick={() => navigate("/cart")}>
             <FaShoppingCart size={24} />
             {cartItems.length > 0 && <span className="cart-count">{cartItems.length}</span>}
           </div>
-
           {user && user.role === "user" && (
             <Link to="/user/orders">
               <button className="btn orders-btn">My Orders</button>
             </Link>
           )}
-
           <div
             className="user-icon"
             onMouseEnter={() => setShowProfile(true)}
