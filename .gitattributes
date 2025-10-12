@@ -1,2 +1,0 @@
-backend/ai_model/*.safetensors filter=lfs diff=lfs merge=lfs -text
-backend/ai_model/model.safetensors filter=lfs diff=lfs merge=lfs -text
