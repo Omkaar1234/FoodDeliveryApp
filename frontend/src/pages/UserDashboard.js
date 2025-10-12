@@ -24,23 +24,23 @@ function UserDashboard() {
 
   // ---------------- Load User Profile ----------------
   const fetchUserProfile = useCallback(async () => {
-    const res = await getProfile();
-    if (!res.success) {
-      console.warn("Failed to fetch profile:", res.error);
+    try {
+      const profile = await getProfile();
+      if (!profile || profile.error) throw new Error(profile.error || "Failed to fetch profile");
+
+      setUser({
+        name: profile.name || "Guest",
+        email: profile.email || "guest@example.com",
+        role: profile.role,
+        id: profile._id,
+      });
+
+      if (profile.role) localStorage.setItem("role", profile.role);
+      if (profile._id) localStorage.setItem("accountId", profile._id);
+    } catch (err) {
+      console.error("fetchUserProfile error:", err);
       navigate("/login");
-      return;
     }
-
-    const profile = res.profile || {};
-    setUser({
-      name: profile.name || "Guest",
-      email: profile.email || "guest@example.com",
-      role: profile.role || "user",
-      id: profile._id || localStorage.getItem("accountId"),
-    });
-
-    if (profile.role) localStorage.setItem("role", profile.role);
-    if (profile._id) localStorage.setItem("accountId", profile._id);
   }, [navigate]);
 
   useEffect(() => {
@@ -51,17 +51,16 @@ function UserDashboard() {
   const fetchRestaurantsData = useCallback(async () => {
     setLoading(true);
     setError("");
-    const res = await fetchAllRestaurants();
-    if (!res.success) {
-      setError(res.error || "Failed to fetch restaurants");
-      setRestaurants([]);
-      setFilteredRestaurants([]);
-    } else {
-      const list = res.data || [];
-      setRestaurants(list);
-      setFilteredRestaurants(list);
+    try {
+      const data = await fetchAllRestaurants();
+      setRestaurants(data || []);
+      setFilteredRestaurants(data || []);
+    } catch (err) {
+      console.error("fetchRestaurantsData error:", err);
+      setError(err.message || "Failed to fetch restaurants");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -71,15 +70,14 @@ function UserDashboard() {
   // ---------------- Filter Restaurants ----------------
   useEffect(() => {
     const term = searchTerm.toLowerCase();
-    setFilteredRestaurants(
-      restaurants.filter(
-        (r) =>
-          (r.name || "").toLowerCase().includes(term) ||
-          (r.type || "").toLowerCase().includes(term) ||
-          (r.location || "").toLowerCase().includes(term) ||
-          (r.address || "").toLowerCase().includes(term)
-      )
+    const filtered = restaurants.filter(
+      (r) =>
+        (r.name || "").toLowerCase().includes(term) ||
+        (r.type || "").toLowerCase().includes(term) ||
+        (r.location || "").toLowerCase().includes(term) ||
+        (r.address || "").toLowerCase().includes(term)
     );
+    setFilteredRestaurants(filtered);
   }, [searchTerm, restaurants]);
 
   // ---------------- Logout ----------------
@@ -116,7 +114,7 @@ function UserDashboard() {
   };
 
   return (
-    <div className="dashboard-wrapper">
+    <div>
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
@@ -144,10 +142,12 @@ function UserDashboard() {
           </div>
 
           {/* Orders Button */}
-          {user?.role === "user" && (
-            <Link to="/user/orders">
-              <button className="btn orders-btn">My Orders</button>
-            </Link>
+          {user && user.role === "user" && (
+            <div className="orders-btn-wrapper">
+              <Link to="/user/orders">
+                <button className="btn orders-btn">My Orders</button>
+              </Link>
+            </div>
           )}
 
           {/* User Profile Dropdown */}
@@ -190,9 +190,10 @@ function UserDashboard() {
 
       {/* Dashboard Content */}
       <div className="dashboard-content">
-        <h2>Welcome, {user?.name || "Guest"}!</h2>
+        <h2>Welcome, {user ? user.name : "Guest"}!</h2>
         <p>Browse restaurants and explore delicious food.</p>
 
+        {/* AI Filtered Items */}
         {aiLoading ? (
           <p>Loading AI results...</p>
         ) : aiResults.length > 0 ? (
@@ -216,39 +217,44 @@ function UserDashboard() {
               ))}
             </div>
           </div>
-        ) : loading ? (
-          <p>Loading restaurants...</p>
-        ) : error ? (
-          <p className="error">{error}</p>
-        ) : filteredRestaurants.length > 0 ? (
-          <div className="restaurant-list">
-            {filteredRestaurants.map((r) => (
-              <div key={r._id} className="restaurant-card">
-                <img
-                  src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
-                  alt={r.name}
-                  className="restaurant-image"
-                />
-                <div className="restaurant-info">
-                  <h3>{r.name}</h3>
-                  <p className="small-text">
-                    {r.type || "Restaurant"} | {r.address || "N/A"}
-                  </p>
-                  <p className="rating">{renderStars(r.rating)}</p>
-                  <button
-                    className="view-menu-btn"
-                    onClick={() => navigate(`/restaurant/${r._id}`)}
-                  >
-                    View Menu
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
         ) : (
-          <p>No restaurants found for "{searchTerm}"</p>
+          <>
+            {loading ? (
+              <p>Loading restaurants...</p>
+            ) : error ? (
+              <p className="error">{error}</p>
+            ) : filteredRestaurants.length > 0 ? (
+              <div className="restaurant-list">
+                {filteredRestaurants.map((r) => (
+                  <div key={r._id} className="restaurant-card">
+                    <img
+                      src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
+                      alt={r.name}
+                      className="restaurant-image"
+                    />
+                    <div className="restaurant-info">
+                      <h3>{r.name}</h3>
+                      <p className="small-text">
+                        {r.type || "Restaurant"} | {r.address || "N/A"}
+                      </p>
+                      <p className="rating">{renderStars(r.rating)}</p>
+                      <button
+                        className="view-menu-btn"
+                        onClick={() => navigate(`/restaurant/${r._id}`)}
+                      >
+                        View Menu
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No restaurants found for "{searchTerm}"</p>
+            )}
+          </>
         )}
 
+        {/* AI Search Trigger */}
         <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
           🍔 AI Mood Search
         </button>

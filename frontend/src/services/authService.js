@@ -1,9 +1,10 @@
+// src/services/authService.js
 const API_URL = process.env.REACT_APP_API_URL;
 
 // ---------------- Helper ----------------
 const parseJSON = async (res) => {
   const text = await res.text();
-  if (!text) return {};
+  if (!text) return {}; // handle empty response
   try {
     return JSON.parse(text);
   } catch {
@@ -23,17 +24,16 @@ export async function loginUser(email, password) {
 
     const data = await parseJSON(response);
 
-    if (!response.ok) return { success: false, error: data.error || "Invalid credentials" };
+    if (!response.ok) {
+      return { success: false, error: data.error || "Invalid credentials" };
+    }
 
-    // Normalize user object
-    const user = data.user || { _id: data.accountId, name: data.name, email, role: data.role };
+    // Save token, role & accountId
+    if (data.token) localStorage.setItem("token", data.token);
+    if (data.role) localStorage.setItem("role", data.role);
+    if (data.accountId) localStorage.setItem("accountId", data.accountId);
 
-    // Save to localStorage
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.role);
-    localStorage.setItem("accountId", data.accountId);
-
-    return { success: true, token: data.token, role: data.role, accountId: data.accountId, user };
+    return { success: true, ...data };
   } catch (err) {
     console.error("Login service error:", err);
     return { success: false, error: "Server error" };
@@ -50,9 +50,12 @@ export async function registerUser(userData) {
     });
 
     const data = await parseJSON(response);
-    if (!response.ok) return { success: false, error: data.error || "User registration failed" };
 
-    return { success: true, user: data };
+    if (!response.ok) {
+      return { success: false, error: data.error || "User registration failed" };
+    }
+
+    return { success: true, ...data };
   } catch (err) {
     console.error("Register user error:", err);
     return { success: false, error: "Server error" };
@@ -69,9 +72,12 @@ export async function registerRestaurant(restaurantData) {
     });
 
     const data = await parseJSON(response);
-    if (!response.ok) return { success: false, error: data.error || "Restaurant registration failed" };
 
-    return { success: true, user: data };
+    if (!response.ok) {
+      return { success: false, error: data.error || "Restaurant registration failed" };
+    }
+
+    return { success: true, ...data };
   } catch (err) {
     console.error("Register restaurant error:", err);
     return { success: false, error: "Server error" };
@@ -83,63 +89,68 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token) return { success: false, error: "No token found; please login again." };
+  if (!token) throw new Error("No token found; please login again.");
   if (requiredRole && role?.toLowerCase() !== requiredRole.toLowerCase()) {
-    return { success: false, error: "Forbidden: Insufficient role" };
+    throw new Error("Forbidden: Insufficient role");
   }
 
-  try {
-    const { body, ...rest } = options;
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...rest,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(body ? { "Content-Type": "application/json" } : {}),
-        ...(options.headers || {}),
-      },
-      ...(body ? { body: typeof body === "string" ? body : JSON.stringify(body) } : {}),
-    });
+  const { body, ...rest } = options;
 
-    const data = await parseJSON(response);
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...rest,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {}),
+    },
+    ...(body ? { body: typeof body === "string" ? body : JSON.stringify(body) } : {}),
+  });
 
-    if (response.status === 401) {
-      localStorage.clear();
-      return { success: false, error: "Unauthorized. Please login again." };
-    }
+  const data = await parseJSON(response);
 
-    if (!response.ok) return { success: false, error: data.error || "Request failed" };
-
-    return { success: true, data };
-  } catch (err) {
-    console.error("authFetch error:", err);
-    return { success: false, error: "Server error" };
-  }
+  if (!response.ok) throw new Error(data.error || "Request failed");
+  return data;
 };
 
 // ---------------- GET PROFILE ----------------
 export const getProfile = async () => {
-  const res = await authFetch("/profile");
-  if (!res.success) return { success: false, error: res.error || "Failed to fetch profile" };
-  // Normalize to return { success, profile }
-  return { success: true, profile: res.data };
+  try {
+    // ✅ Backend provides one endpoint: /api/profile
+    const data = await authFetch("/profile");
+
+    if (!data.success) {
+      return { success: false, error: data.error || "Failed to fetch profile" };
+    }
+
+    return data; // returns { success: true, _id, name, email, role }
+  } catch (err) {
+    console.error("Get profile error:", err);
+    return { success: false, error: err.message || "Server error" };
+  }
 };
 
 // ---------------- UPDATE PROFILE ----------------
 export const updateProfile = async (profileData) => {
-  const res = await authFetch("/profile", { method: "PUT", body: profileData });
-  if (!res.success) return { success: false, error: res.error || "Failed to update profile" };
-  return { success: true, profile: res.data };
+  try {
+    // ✅ Same endpoint for both roles
+    return await authFetch("/profile", { method: "PUT", body: profileData });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    return { success: false, error: err.message || "Server error" };
+  }
 };
 
-// ---------------- FETCH ALL RESTAURANTS ----------------
+
+
+// ---------------- FETCH ALL RESTAURANTS (PUBLIC) ----------------
 export const fetchAllRestaurants = async () => {
   try {
     const res = await fetch(`${API_URL}/restaurants`);
     const data = await parseJSON(res);
-    if (!res.ok) return { success: false, data: [], error: data.error || "Failed to fetch restaurants" };
-    return { success: true, data };
+    if (!res.ok) throw new Error(data.error || "Failed to fetch restaurants");
+    return data;
   } catch (err) {
     console.error("fetchAllRestaurants error:", err);
-    return { success: false, data: [], error: "Server error" };
+    return [];
   }
 };
