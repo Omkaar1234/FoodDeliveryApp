@@ -23,23 +23,17 @@ export async function loginUser(email, password) {
 
     const data = await parseJSON(response);
 
-    if (!response.ok) {
-      return { success: false, error: data.error || "Invalid credentials" };
-    }
+    if (!response.ok) return { success: false, error: data.error || "Invalid credentials" };
 
-    // Save token, role & accountId
-    if (data.token) localStorage.setItem("token", data.token);
-    if (data.role) localStorage.setItem("role", data.role);
-    if (data.accountId) localStorage.setItem("accountId", data.accountId);
+    // Normalize user object
+    const user = data.user || { _id: data.accountId, name: data.name, email, role: data.role };
 
-    // Return normalized data
-    return {
-      success: true,
-      token: data.token,
-      role: data.role,
-      accountId: data.accountId,
-      user: data.user || { _id: data.accountId, role: data.role, name: data.name, email: data.email }
-    };
+    // Save to localStorage
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.role);
+    localStorage.setItem("accountId", data.accountId);
+
+    return { success: true, token: data.token, role: data.role, accountId: data.accountId, user };
   } catch (err) {
     console.error("Login service error:", err);
     return { success: false, error: "Server error" };
@@ -126,17 +120,18 @@ export const authFetch = async (endpoint, options = {}, requiredRole = null) => 
 export const getProfile = async () => {
   const res = await authFetch("/profile");
   if (!res.success) return { success: false, error: res.error || "Failed to fetch profile" };
-  return { success: true, ...res.data };
+  // Normalize to return { success, profile }
+  return { success: true, profile: res.data };
 };
 
 // ---------------- UPDATE PROFILE ----------------
 export const updateProfile = async (profileData) => {
   const res = await authFetch("/profile", { method: "PUT", body: profileData });
   if (!res.success) return { success: false, error: res.error || "Failed to update profile" };
-  return { success: true, ...res.data };
+  return { success: true, profile: res.data };
 };
 
-// ---------------- FETCH ALL RESTAURANTS (PUBLIC) ----------------
+// ---------------- FETCH ALL RESTAURANTS ----------------
 export const fetchAllRestaurants = async () => {
   try {
     const res = await fetch(`${API_URL}/restaurants`);

@@ -24,18 +24,21 @@ function UserDashboard() {
 
   // ---------------- Load User Profile ----------------
   const fetchUserProfile = useCallback(async () => {
-    const profile = await getProfile();
-    if (!profile.success) {
-      console.warn("Failed to fetch profile:", profile.error);
+    const res = await getProfile();
+    if (!res.success) {
+      console.warn("Failed to fetch profile:", res.error);
       navigate("/login");
       return;
     }
+
+    const profile = res.profile || {};
     setUser({
       name: profile.name || "Guest",
       email: profile.email || "guest@example.com",
-      role: profile.role,
-      id: profile._id,
+      role: profile.role || "user",
+      id: profile._id || localStorage.getItem("accountId"),
     });
+
     if (profile.role) localStorage.setItem("role", profile.role);
     if (profile._id) localStorage.setItem("accountId", profile._id);
   }, [navigate]);
@@ -187,10 +190,9 @@ function UserDashboard() {
 
       {/* Dashboard Content */}
       <div className="dashboard-content">
-        <h2>Welcome, {user ? user.name : "Guest"}!</h2>
+        <h2>Welcome, {user?.name || "Guest"}!</h2>
         <p>Browse restaurants and explore delicious food.</p>
 
-        {/* AI Filtered Items */}
         {aiLoading ? (
           <p>Loading AI results...</p>
         ) : aiResults.length > 0 ? (
@@ -247,7 +249,6 @@ function UserDashboard() {
           <p>No restaurants found for "{searchTerm}"</p>
         )}
 
-        {/* AI Search Trigger */}
         <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
           🍔 AI Mood Search
         </button>
