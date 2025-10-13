@@ -6,18 +6,34 @@ import logo from "../styles/assets/icon.png";
 import { getProfile, fetchAllRestaurants } from "../services/authService";
 import { CartContext } from "../context/CartContext";
 
-// Dynamic image import helper
-const importAll = (r) => {
-  let images = {};
-  r.keys().forEach((item) => {
-    const name = item.replace("./", "").replace(/\.(png|jpe?g|svg)$/i, "").toLowerCase();
-    images[name] = r(item);
-  });
-  return images;
-};
+// Restaurant images mapping
+import hotelomkar from "../styles/assets/hotelomkar.avif";
+import hotelmadhur from "../styles/assets/hotelmadhur.avif";
+import burgerhub from "../styles/assets/burgerhub.avif";
+import fastntasty from "../styles/assets/fastntasty.avif";
+import chaatgully from "../styles/assets/chaatgully.avif";
+import hotelsarovar from "../styles/assets/hotelsarovar.avif";
+import mountainviewhotel from "../styles/assets/mountainviewhotel.avif";
+import pizzapalace from "../styles/assets/pizzapalace.avif";
+import spicybites from "../styles/assets/spicybites.avif";
+import sunnybarlounge from "../styles/assets/sunnybar&lounge.avif";
+import thecoffeecorner from "../styles/assets/thecoffeecorner.avif";
+import streetbites from "../styles/assets/streetbites.avif";
 
-// Load all restaurant images dynamically
-const restaurantImages = importAll(require.context("./assets", false, /\.(png|jpe?g|svg)$/));
+const restaurantImages = {
+  "Hotel Omkar": hotelomkar,
+  "Hotel Madhur": hotelmadhur,
+  "Burger Hub": burgerhub,
+  "Fast N Tasty": fastntasty,
+  "Chaat Gully": chaatgully,
+  "Hotel Sarovar": hotelsarovar,
+  "Mountain View Hotel": mountainviewhotel,
+  "Pizza Palace": pizzapalace,
+  "Spicy Bites": spicybites,
+  "Sunny Bar & Lounge": sunnybarlounge,
+  "The Coffee Corner": thecoffeecorner,
+  "Street Bites": streetbites,
+};
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -145,17 +161,9 @@ function UserDashboard() {
     }
   };
 
-  // ---------------- Get Restaurant Image ----------------
-  const getRestaurantImage = (restaurantName = "") => {
-   if (!restaurantName) return "/default-restaurant.jpg";
-   const formattedName = restaurantName.toLowerCase().replace(/\s+/g, "");
-   try {
-     return require(`../styles/assets/${formattedName}.avif`);
-    } catch {
-     return "/default-restaurant.jpg";
-    }
-  };
-  
+  // ---------------- Get restaurant image ----------------
+  const getRestaurantImage = (name) => restaurantImages[name] || "/default-restaurant.jpg";
+
   return (
     <div className="dashboard-wrapper">
       {/* Navbar */}
@@ -237,10 +245,9 @@ function UserDashboard() {
               {aiResults.map((item) => (
                 <div key={item._id} className="restaurant-card">
                   <img
-                    src={item.image || "/default-food.jpg"}
+                    src={getRestaurantImage(item.name)}
                     alt={item.name}
                     className="restaurant-image"
-                    onError={(e) => (e.target.src = "/default-food.jpg")}
                   />
                   <div className="restaurant-info">
                     <h3>{item.name}</h3>
@@ -259,13 +266,12 @@ function UserDashboard() {
         ) : filteredRestaurants.length > 0 ? (
           <div className="restaurant-list">
             {filteredRestaurants.map((r) => (
-                 <div key={r._id} className="restaurant-card">
-                  <img
-                    src={getRestaurantImage(r.name)}
-                    onError={(e) => (e.target.src = "/default-restaurant.jpg")}
-                    alt={r.name}
-                    className="restaurant-image"
-                  />
+              <div key={r._id} className="restaurant-card">
+                <img
+                  src={getRestaurantImage(r.name)}
+                  alt={r.name}
+                  className="restaurant-image"
+                />
                 <div className="restaurant-info">
                   <h3>{r.name}</h3>
                   <p className="small-text">{r.type || "Restaurant"} | {r.address || "N/A"}</p>
