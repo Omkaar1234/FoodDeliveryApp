@@ -173,7 +173,7 @@ function UserProfile() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="bio">Bio</label>
+            <label htmlFor="bio">Address</label>
             <div className="input-wrapper">
               <span className="input-icon">✏️</span>
               <textarea
@@ -181,7 +181,7 @@ function UserProfile() {
                 name="bio"
                 value={profile.bio}
                 onChange={handleChange}
-                placeholder="Tell us about yourself..."
+                placeholder="Tell us your address..."
                 rows="4"
               />
             </div>
