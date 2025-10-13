@@ -6,6 +6,21 @@ import logo from "../styles/assets/icon.png";
 import { getProfile, fetchAllRestaurants } from "../services/authService";
 import { CartContext } from "../context/CartContext";
 
+// Dynamic image import helper
+const importAll = (r) => {
+  let images = {};
+  r.keys().forEach((item) => {
+    const name = item.replace("./", "").replace(/\.(png|jpe?g|svg)$/i, "").toLowerCase();
+    images[name] = r(item);
+  });
+  return images;
+};
+
+// Load all restaurant images dynamically
+const restaurantImages = importAll(require.context("./assets", false, /\.(png|jpe?g|svg)$/));
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function UserDashboard() {
   const [user, setUser] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
@@ -56,8 +71,11 @@ function UserDashboard() {
     setError("");
     try {
       const data = await fetchAllRestaurants();
-      // Ensure restaurants is an array
-      const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+      const list = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data)
+        ? data
+        : [];
       setRestaurants(list);
       setFilteredRestaurants(list);
     } catch (err) {
@@ -104,13 +122,20 @@ function UserDashboard() {
     if (!moodInput) return;
     setAILoading(true);
     try {
-      const res = await fetch("/api/ai/filter", {
+      const res = await fetch(`${API_URL}/api/ai/filter`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: moodInput }),
       });
+
       const data = await res.json();
-      setAIResults(data.items || []);
+      if (data && Array.isArray(data.items)) {
+        setAIResults(data.items);
+      } else {
+        console.warn("AI returned unexpected format:", data);
+        setAIResults([]);
+      }
+
       setShowAIModal(false);
     } catch (err) {
       console.error("AI search error:", err);
@@ -118,6 +143,13 @@ function UserDashboard() {
     } finally {
       setAILoading(false);
     }
+  };
+
+  // ---------------- Get Image by Restaurant Name ----------------
+  const getRestaurantImage = (restaurantName) => {
+    if (!restaurantName) return "/default-restaurant.jpg";
+    const key = restaurantName.toLowerCase().replace(/\s+/g, "");
+    return restaurantImages[key] || "/default-restaurant.jpg";
   };
 
   return (
@@ -201,9 +233,10 @@ function UserDashboard() {
               {aiResults.map((item) => (
                 <div key={item._id} className="restaurant-card">
                   <img
-                    src={item.image || "https://via.placeholder.com/400x250?text=Food"}
+                    src={item.image || "/default-food.jpg"}
                     alt={item.name}
                     className="restaurant-image"
+                    onError={(e) => (e.target.src = "/default-food.jpg")}
                   />
                   <div className="restaurant-info">
                     <h3>{item.name}</h3>
@@ -224,9 +257,10 @@ function UserDashboard() {
             {filteredRestaurants.map((r) => (
               <div key={r._id} className="restaurant-card">
                 <img
-                  src={r.image || "https://via.placeholder.com/400x250?text=Restaurant"}
+                  src={getRestaurantImage(r.name)}
                   alt={r.name}
                   className="restaurant-image"
+                  onError={(e) => (e.target.src = "/default-restaurant.jpg")}
                 />
                 <div className="restaurant-info">
                   <h3>{r.name}</h3>
