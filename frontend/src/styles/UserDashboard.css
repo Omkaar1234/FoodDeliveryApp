@@ -321,7 +321,7 @@ body {
   text-align: center;
   font-size: 1.1rem;
   color: var(--muted);
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 
 /* Loading and Error States */
@@ -414,7 +414,8 @@ body {
   font-family: 'Poppins', sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text);
+  margin : auto;
+  color: #0a1321;
   margin-bottom: 0.5rem;
 }
 
@@ -455,7 +456,7 @@ body {
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   align-self: flex-start;
   font-size: 14px;
-  margin-top: auto;
+  margin: auto;
 }
 
 .view-menu-btn:hover {
