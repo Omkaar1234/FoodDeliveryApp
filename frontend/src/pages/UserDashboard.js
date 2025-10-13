@@ -145,13 +145,17 @@ function UserDashboard() {
     }
   };
 
-  // ---------------- Get Image by Restaurant Name ----------------
-  const getRestaurantImage = (restaurantName) => {
-    if (!restaurantName) return "/default-restaurant.jpg";
-    const key = restaurantName.toLowerCase().replace(/\s+/g, "");
-    return restaurantImages[key] || "/default-restaurant.jpg";
+  // ---------------- Get Restaurant Image ----------------
+  const getRestaurantImage = (restaurantName = "") => {
+   if (!restaurantName) return "/default-restaurant.jpg";
+   const formattedName = restaurantName.toLowerCase().replace(/\s+/g, "");
+   try {
+     return require(`../styles/assets/${formattedName}.avif`);
+    } catch {
+     return "/default-restaurant.jpg";
+    }
   };
-
+  
   return (
     <div className="dashboard-wrapper">
       {/* Navbar */}
@@ -255,13 +259,13 @@ function UserDashboard() {
         ) : filteredRestaurants.length > 0 ? (
           <div className="restaurant-list">
             {filteredRestaurants.map((r) => (
-              <div key={r._id} className="restaurant-card">
-                <img
-                  src={getRestaurantImage(r.name)}
-                  alt={r.name}
-                  className="restaurant-image"
-                  onError={(e) => (e.target.src = "/default-restaurant.jpg")}
-                />
+                 <div key={r._id} className="restaurant-card">
+                  <img
+                    src={getRestaurantImage(r.name)}
+                    onError={(e) => (e.target.src = "/default-restaurant.jpg")}
+                    alt={r.name}
+                    className="restaurant-image"
+                  />
                 <div className="restaurant-info">
                   <h3>{r.name}</h3>
                   <p className="small-text">{r.type || "Restaurant"} | {r.address || "N/A"}</p>
