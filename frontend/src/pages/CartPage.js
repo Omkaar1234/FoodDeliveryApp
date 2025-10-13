@@ -1,47 +1,58 @@
 import React, { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { authFetch } from "../services/authService";
+import { authFetch } from "../services/authService"; // Ensure this exists
 import "../styles/CartPage.css";
 
 function CartPage() {
-  const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } = useContext(CartContext);
+  const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } =
+    useContext(CartContext);
   const navigate = useNavigate();
 
+  // ---------------- Handle Quantity Change ----------------
   const handleQuantityChange = (itemId, restaurantId, value) => {
-    const quantity = Math.max(Number(value) || 1, 1);
+    const quantity = Math.max(Number(value) || 1, 1); // Minimum 1
     updateQuantity(itemId, restaurantId, quantity);
   };
 
+  // ---------------- Place Order ----------------
   const placeOrder = async () => {
     if (cartItems.length === 0) return alert("Cart is empty!");
 
+    // Ensure single restaurant order
     const restaurantIds = [...new Set(cartItems.map((i) => i.restaurantId))];
     if (restaurantIds.length > 1) {
-      return alert("You have items from multiple restaurants. Place separate orders for each.");
+      return alert(
+        "You have items from multiple restaurants. Place separate orders for each."
+      );
     }
 
     try {
       const orderData = {
         restaurantId: cartItems[0].restaurantId,
-        items: cartItems.map(({ name, price, quantity }) => ({ name, price, quantity })),
+        items: cartItems.map(({ name, price, quantity }) => ({
+          name,
+          price,
+          quantity,
+        })),
         total: totalPrice,
-        deliveryAddress: "Default Address", // You can replace with user address
+        deliveryAddress: "Default Address", // Replace with actual user address if available
       };
 
-      // Correct use of authFetch
       const res = await authFetch("/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
 
-      // res is already parsed JSON in our authFetch
-      if (!res.success) throw new Error(res.error || "Failed to place order");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to place order");
+      }
 
       alert("Order placed successfully!");
       clearCart();
-      navigate("/user/orders");
+      navigate("/user/orders"); // Navigate to user orders to track
     } catch (err) {
       console.error("Order placement failed:", err);
       alert(err.message || "Failed to place order. Try again.");
@@ -64,7 +75,9 @@ function CartPage() {
               </div>
               <div className="item-actions">
                 <button
-                  onClick={() => updateQuantity(item._id, item.restaurantId, item.quantity - 1)}
+                  onClick={() =>
+                    updateQuantity(item._id, item.restaurantId, item.quantity - 1)
+                  }
                   disabled={item.quantity <= 1}
                 >
                   -
@@ -73,10 +86,14 @@ function CartPage() {
                   type="number"
                   min="1"
                   value={item.quantity}
-                  onChange={(e) => handleQuantityChange(item._id, item.restaurantId, e.target.value)}
+                  onChange={(e) =>
+                    handleQuantityChange(item._id, item.restaurantId, e.target.value)
+                  }
                 />
                 <button
-                  onClick={() => updateQuantity(item._id, item.restaurantId, item.quantity + 1)}
+                  onClick={() =>
+                    updateQuantity(item._id, item.restaurantId, item.quantity + 1)
+                  }
                 >
                   +
                 </button>
@@ -93,9 +110,16 @@ function CartPage() {
 
           <div className="cart-total">
             <h3>Total: ₹{totalPrice}</h3>
-            <button className="btn checkout-btn" onClick={placeOrder}>Place Order</button>
-            <button onClick={clearCart} className="clear-btn">Clear Cart</button>
-            <button onClick={() => navigate("/user/dashboard")} className="continue-btn">
+            <button className="btn checkout-btn" onClick={placeOrder}>
+              Place Order
+            </button>
+            <button onClick={clearCart} className="clear-btn">
+              Clear Cart
+            </button>
+            <button
+              onClick={() => navigate("/user/dashboard")}
+              className="continue-btn"
+            >
               Continue Shopping
             </button>
           </div>

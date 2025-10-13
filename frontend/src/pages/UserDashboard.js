@@ -209,35 +209,24 @@ function UserDashboard() {
         </div>
       </nav>
 
-       {aiLoading ? (
-        <p>Loading AI results...</p>
-          ) : aiResults.length > 0 ? (
-            <div>
-              <h3>Recommended Restaurants for your mood:</h3>
-               <div className="restaurant-list">
-               {aiResults.map((r) => (
-               <div key={r._id} className="restaurant-card">
-               <img
-                 src={getRestaurantImage(r.name)}
-                 alt={r.name}
-                  className="restaurant-image"
-                 />
-           <div className="restaurant-info">
-             <h3>{r.name}</h3>
-             <p className="small-text">{r.type || "Restaurant"} | {r.address || "N/A"}</p>
-             <p className="rating">{renderStars(r.rating)}</p>
-             <button
-               className="view-menu-btn"
-               onClick={() => navigate(`/restaurant/${r._id}`)}
-             >
-               View Menu
-             </button>
-           </div>
-         </div>
-       ))}
-     </div>
-    </div>
-  ) : null}
+      {/* AI Modal */}
+      {showAIModal && (
+        <div className="ai-modal">
+          <div className="ai-modal-content">
+            <h3>Find food by your mood</h3>
+            <input
+              type="text"
+              placeholder="How are you feeling?"
+              value={moodInput}
+              onChange={(e) => setMoodInput(e.target.value)}
+            />
+            <div className="ai-modal-buttons">
+              <button onClick={handleAISearch}>Search</button>
+              <button onClick={() => setShowAIModal(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Dashboard Content */}
       <div className="dashboard-content">
