@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 // ---------------- Helper ----------------
 const parseJSON = async (res) => {
@@ -129,9 +129,7 @@ export const fetchAllRestaurants = async () => {
     const res = await fetch(`${API_URL}/restaurants`);
     const data = await parseJSON(res);
 
-    // Always return array in data
     const restaurants = Array.isArray(data) ? data : data?.data || [];
-
     return { success: res.ok, data: restaurants, error: data?.error || (res.ok ? null : "Failed to fetch restaurants") };
   } catch (err) {
     console.error("fetchAllRestaurants error:", err);

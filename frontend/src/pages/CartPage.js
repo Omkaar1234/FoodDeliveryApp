@@ -24,20 +24,19 @@ function CartPage() {
     try {
       const orderData = {
         restaurantId: cartItems[0].restaurantId,
-        items: cartItems.map(({ name, price, quantity }) => ({
-          name,
-          price,
-          quantity,
-        })),
+        items: cartItems.map(({ name, price, quantity }) => ({ name, price, quantity })),
         total: totalPrice,
-        deliveryAddress: "Default Address",
+        deliveryAddress: "Default Address", // You can replace with user address
       };
 
+      // Correct use of authFetch
       const res = await authFetch("/orders", {
         method: "POST",
-        body: orderData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
       });
 
+      // res is already parsed JSON in our authFetch
       if (!res.success) throw new Error(res.error || "Failed to place order");
 
       alert("Order placed successfully!");
