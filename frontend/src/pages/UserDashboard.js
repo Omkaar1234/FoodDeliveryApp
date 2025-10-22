@@ -48,6 +48,7 @@ function UserDashboard() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [moodInput, setMoodInput] = useState("");
   const [aiResults, setAIResults] = useState([]);
+  const [aiMood, setAIMood] = useState(""); 
   const [aiLoading, setAILoading] = useState(false);
 
   const navigate = useNavigate();
@@ -134,35 +135,40 @@ function UserDashboard() {
   };
 
   // ---------------- AI Mood Search ----------------
-  const handleAISearch = async () => {
-    if (!moodInput) return;
+  const handleAISearch = async (text) => {
+    if (!text) return;
     setAILoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/ai/filter`, {
+      const res = await fetch(`${API_URL}/ai/filter`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: moodInput }),
+        body: JSON.stringify({ text }),
       });
 
       const data = await res.json();
-      if (data && Array.isArray(data.items)) {
+      console.log("AI API Response:", data);
+
+      if (data && data.success && Array.isArray(data.items)) {
         setAIResults(data.items);
+        setAIMood(data.mood || "Unknown");
       } else {
-        console.warn("AI returned unexpected format:", data);
         setAIResults([]);
+        setAIMood("");
       }
 
       setShowAIModal(false);
+      setMoodInput("");
     } catch (err) {
       console.error("AI search error:", err);
       setAIResults([]);
+      setAIMood("");
     } finally {
       setAILoading(false);
     }
   };
 
-  // ---------------- Get restaurant image ----------------
-  const getRestaurantImage = (name) => restaurantImages[name] || "/default-restaurant.jpg";
+  const getRestaurantImage = (name) =>
+    restaurantImages[name] || "/default-restaurant.jpg";
 
   return (
     <div className="dashboard-wrapper">
@@ -179,12 +185,16 @@ function UserDashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <button className="search-btn"><FaSearch /></button>
+          <button className="search-btn">
+            <FaSearch />
+          </button>
         </div>
         <div className="navbar-right">
           <div className="cart-icon" onClick={() => navigate("/cart")}>
             <FaShoppingCart size={24} />
-            {cartItems.length > 0 && <span className="cart-count">{cartItems.length}</span>}
+            {cartItems.length > 0 && (
+              <span className="cart-count">{cartItems.length}</span>
+            )}
           </div>
           {user && user.role === "user" && (
             <Link to="/user/orders">
@@ -199,9 +209,13 @@ function UserDashboard() {
             <FaUserCircle size={28} />
             {showProfile && user && (
               <div className="profile-dropdown">
-                <p><strong>{user.name}</strong></p>
+                <p>
+                  <strong>{user.name}</strong>
+                </p>
                 <p>{user.email}</p>
-                <button onClick={() => navigate("/user/profile")}>Edit Profile</button>
+                <button onClick={() => navigate("/user/profile")}>
+                  Edit Profile
+                </button>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             )}
@@ -213,56 +227,61 @@ function UserDashboard() {
       {showAIModal && (
         <div className="ai-modal">
           <div className="ai-modal-content">
-            <h3>Find food by your mood</h3>
+            <h3>Find food by your mood 🍔</h3>
             <input
               type="text"
-              placeholder="How are you feeling?"
+              placeholder="How are you feeling today?"
               value={moodInput}
               onChange={(e) => setMoodInput(e.target.value)}
             />
             <div className="ai-modal-buttons">
-              <button onClick={handleAISearch}>Search</button>
+              <button onClick={() => handleAISearch(moodInput)}>Search</button>
               <button onClick={() => setShowAIModal(false)}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Dashboard Content */}
       <div className="dashboard-content">
         <h2>Welcome, {user ? user.name : "Guest"}!</h2>
         <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
-          🍔 AI Mood Search
+          🤖 AI Mood Search
         </button>
-        <p>Browse restaurants and explore delicious food.</p>
+        <p>Describe your mood and let AI recommend food you'll love!</p>
 
+        {/* AI Results */}
         {aiLoading ? (
-          <p>Loading AI results...</p>
+          <p>Analyzing your mood...</p>
         ) : aiResults.length > 0 ? (
           <div>
-            <h3>Recommended for your mood:</h3>
+            <h3>
+              Recommended for your mood:{" "}
+              <span className="highlight">"{aiMood}"</span>
+            </h3>
+            <button
+              className="try-again-btn"
+              onClick={() => setShowAIModal(true)}
+            >
+              🔄 Try Again
+            </button>
             <div className="restaurant-list">
               {aiResults.map((item) => (
                 <div key={item._id} className="restaurant-card">
                   <img
-                    src={getRestaurantImage(item.name)}
+                    src={item.image || "/default-food.jpg"}
                     alt={item.name}
                     className="restaurant-image"
                   />
                   <div className="restaurant-info">
                     <h3>{item.name}</h3>
-                    <p className="small-text">{item.category || "Food"}</p>
-                    <p className="rating">{renderStars(item.rating)}</p>
-                    <p>₹{item.price}</p>
+                    <p className="small-text">
+                      {item.category || "Food"} | ₹{item.price}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        ) : loading ? (
-          <p>Loading restaurants...</p>
-        ) : error ? (
-          <p className="error">{error}</p>
         ) : filteredRestaurants.length > 0 ? (
           <div className="restaurant-list">
             {filteredRestaurants.map((r) => (
@@ -274,7 +293,9 @@ function UserDashboard() {
                 />
                 <div className="restaurant-info">
                   <h3>{r.name}</h3>
-                  <p className="small-text">{r.type || "Restaurant"} | {r.address || "N/A"}</p>
+                  <p className="small-text">
+                    {r.type || "Restaurant"} | {r.address || "N/A"}
+                  </p>
                   <p className="rating">{renderStars(r.rating)}</p>
                   <button
                     className="view-menu-btn"
