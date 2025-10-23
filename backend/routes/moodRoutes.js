@@ -1,7 +1,6 @@
 // ./routes/moodRoutes.js
 import express from "express";
-import mongoose from "mongoose";
-import FoodItem from "../models/FoodItem.js"; // Must map to 'fooditems' collection
+import FoodItem from "../models/FoodItem.js";
 import { predictMood } from "../utils/classifyMood.js";
 import jwt from "jsonwebtoken";
 
@@ -22,41 +21,58 @@ router.post("/filter", async (req, res) => {
       });
     }
 
-    // 1️⃣ Get mood prediction from Hugging Face
+    // 1️⃣ Get mood prediction from AI
     const prediction = await predictMood(text);
     console.log("🎯 Raw prediction from AI:", prediction);
 
-    const topMood = prediction?.emotion || "NEUTRAL";
+    let topMood = prediction?.emotion?.toUpperCase() || "NEUTRAL";
     let tagsToSearch = prediction?.tags || [];
 
-    // Safety check — if nothing found, fallback
-    if (!Array.isArray(tagsToSearch) || tagsToSearch.length === 0) {
-      console.log("⚠️ No tags returned by AI — using fallback tag: 'regular'");
-      tagsToSearch = ["regular"];
+    // 2️⃣ Fallback — detect mood by keywords if AI gives neutral
+    if (topMood === "NEUTRAL" || !topMood) {
+      const lowerText = text.toLowerCase();
+
+      if (lowerText.includes("sad") || lowerText.includes("upset") || lowerText.includes("tired"))
+        topMood = "SADNESS";
+      else if (lowerText.includes("happy") || lowerText.includes("excited") || lowerText.includes("joy"))
+        topMood = "JOY";
+      else if (lowerText.includes("angry") || lowerText.includes("frustrated") || lowerText.includes("irritated"))
+        topMood = "ANGER";
+      else if (lowerText.includes("scared") || lowerText.includes("nervous") || lowerText.includes("worried"))
+        topMood = "FEAR";
+      else if (lowerText.includes("surprised") || lowerText.includes("amazed"))
+        topMood = "SURPRISE";
+      else
+        topMood = "NEUTRAL";
+
+      console.log(`🧠 Fallback mood detected as: ${topMood}`);
     }
 
-    // 2️⃣ Prepare case-insensitive regex tags for MongoDB
-    const regexTags = tagsToSearch.map(
-      (tag) => new RegExp(`^${tag}$`, "i") // case-insensitive
-    );
+    // 3️⃣ Define mood → food tag mapping (manual, reliable)
+    const moodTagMap = {
+      JOY: ["sweet", "ice-cream", "cold", "fruit", "dessert"],
+      SADNESS: ["comfort", "fried", "cheesy", "heavy", "spicy"],
+      ANGER: ["spicy", "strong-flavor", "crispy"],
+      FEAR: ["light", "healthy", "soupy"],
+      SURPRISE: ["unique", "fusion", "new"],
+      NEUTRAL: ["regular", "simple", "veg", "balanced"],
+    };
 
-    console.log(`🔍 Searching MongoDB for items with tags: ${tagsToSearch.join(", ")}`);
+    // 4️⃣ If no AI tags, use fallback from map
+    if (!Array.isArray(tagsToSearch) || tagsToSearch.length === 0) {
+      tagsToSearch = moodTagMap[topMood] || ["regular"];
+      console.log(`⚙️ Using fallback tags for ${topMood}: ${tagsToSearch.join(", ")}`);
+    }
 
-    // 3️⃣ Query MongoDB 'fooditems' collection
+    // 5️⃣ Search in MongoDB for matching food items
+    const regexTags = tagsToSearch.map((tag) => new RegExp(`^${tag}$`, "i"));
+
     const items = await FoodItem.find({
       tags: { $in: regexTags },
     }).limit(20);
 
-    if (!items || items.length === 0) {
-      console.log("⚠️ No matching items found in database for tags:", tagsToSearch);
-      return res.status(200).json({
-        success: true,
-        mood: topMood,
-        items: [],
-      });
-    }
+    console.log(`🍽 Found ${items.length} items for mood "${topMood}"`);
 
-    // 4️⃣ Return response
     res.status(200).json({
       success: true,
       mood: topMood,

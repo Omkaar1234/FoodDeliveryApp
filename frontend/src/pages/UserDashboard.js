@@ -88,11 +88,7 @@ function UserDashboard() {
     setError("");
     try {
       const data = await fetchAllRestaurants();
-      const list = Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data)
-        ? data
-        : [];
+      const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
       setRestaurants(list);
       setFilteredRestaurants(list);
     } catch (err) {
@@ -185,16 +181,25 @@ function UserDashboard() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <button className="search-btn">
+          <button
+            className="search-btn"
+            onClick={() => setFilteredRestaurants(
+              restaurants.filter(
+                (r) =>
+                  (r.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  (r.type || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  (r.location || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  (r.address || "").toLowerCase().includes(searchTerm.toLowerCase())
+              )
+            )}
+          >
             <FaSearch />
           </button>
         </div>
         <div className="navbar-right">
           <div className="cart-icon" onClick={() => navigate("/cart")}>
             <FaShoppingCart size={24} />
-            {cartItems.length > 0 && (
-              <span className="cart-count">{cartItems.length}</span>
-            )}
+            {cartItems.length > 0 && <span className="cart-count">{cartItems.length}</span>}
           </div>
           {user && user.role === "user" && (
             <Link to="/user/orders">
@@ -209,13 +214,9 @@ function UserDashboard() {
             <FaUserCircle size={28} />
             {showProfile && user && (
               <div className="profile-dropdown">
-                <p>
-                  <strong>{user.name}</strong>
-                </p>
+                <p><strong>{user.name}</strong></p>
                 <p>{user.email}</p>
-                <button onClick={() => navigate("/user/profile")}>
-                  Edit Profile
-                </button>
+                <button onClick={() => navigate("/user/profile")}>Edit Profile</button>
                 <button onClick={handleLogout}>Logout</button>
               </div>
             )}
@@ -235,13 +236,28 @@ function UserDashboard() {
               onChange={(e) => setMoodInput(e.target.value)}
             />
             <div className="ai-modal-buttons">
-              <button onClick={() => handleAISearch(moodInput)}>Search</button>
-              <button onClick={() => setShowAIModal(false)}>Cancel</button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAISearch(moodInput);
+                }}
+              >
+                Search
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowAIModal(false);
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Dashboard Content */}
       <div className="dashboard-content">
         <h2>Welcome, {user ? user.name : "Guest"}!</h2>
         <button className="ai-search-btn" onClick={() => setShowAIModal(true)}>
@@ -249,7 +265,6 @@ function UserDashboard() {
         </button>
         <p>Describe your mood and let AI recommend food you'll love!</p>
 
-        {/* AI Results */}
         {aiLoading ? (
           <p>Analyzing your mood...</p>
         ) : aiResults.length > 0 ? (
@@ -258,20 +273,12 @@ function UserDashboard() {
               Recommended for your mood:{" "}
               <span className="highlight">"{aiMood}"</span>
             </h3>
-            <button
-              className="try-again-btn"
-              onClick={() => setShowAIModal(true)}
-            >
+            <button className="try-again-btn" onClick={() => setShowAIModal(true)}>
               🔄 Try Again
             </button>
             <div className="restaurant-list">
               {aiResults.map((item) => (
                 <div key={item._id} className="restaurant-card">
-                  <img
-                    src={item.image || "/default-food.jpg"}
-                    alt={item.name}
-                    className="restaurant-image"
-                  />
                   <div className="restaurant-info">
                     <h3>{item.name}</h3>
                     <p className="small-text">
