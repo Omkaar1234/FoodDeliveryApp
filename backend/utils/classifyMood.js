@@ -20,7 +20,7 @@ export const predictMood = async (text) => {
       { inputs: text },
       {
         headers: {
-          "Authorization": "Bearer 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",
+          "Authorization": "Bearer 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",
           "Content-Type": "application/json",
         },
       }
