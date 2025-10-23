@@ -14,14 +14,13 @@ export const predictMood = async (text) => {
     if (!text || typeof text !== "string") {
       return { emotion: "NEUTRAL", tags: ["regular"] };
     }
-console.log("process.env.HF_API_KEY",process.env.HF_API_KEY)
     // 1️⃣ Call Hugging Face API
     const response = await axios.post(
       `https://api-inference.huggingface.co/models/${MODEL}`,
       { inputs: text },
       {
         headers: {
-          "Authorization": `Bearer ${process.env.HF_API_KEY}`,
+          "Authorization": "Bearer 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",
           "Content-Type": "application/json",
         },
       }
