@@ -50,9 +50,10 @@ function UserDashboard() {
   const [aiResults, setAIResults] = useState([]);
   const [aiMood, setAIMood] = useState(""); 
   const [aiLoading, setAILoading] = useState(false);
+  const [showAddedPopup, setShowAddedPopup] = useState(false); // ✅ added
 
   const navigate = useNavigate();
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, addToCart, updateQuantity } = useContext(CartContext);
 
   // ---------------- Load User Profile ----------------
   const fetchUserProfile = useCallback(async () => {
@@ -162,6 +163,28 @@ function UserDashboard() {
       setAILoading(false);
     }
   };
+
+  //ADD to Cart Functionality after ai search
+   const handleAddToCart = (item) => {
+  addToCart({
+    _id: item._id,
+    name: item.name,
+    price: item.price,
+    quantity: 1,
+    restaurantId: item.restaurantId || "",
+    restaurantName: item.restaurantName || "",
+  });
+  setShowAddedPopup(true);
+  setTimeout(() => setShowAddedPopup(false), 1500);
+};
+
+const handleChangeQuantity = (itemId, delta) => {
+  const cartItem = cartItems.find((c) => c._id === itemId);
+  if (!cartItem) return;
+  const newQuantity = Math.max(cartItem.quantity + delta, 1);
+  updateQuantity(itemId, cartItem.restaurantId, newQuantity);
+};
+
 
   const getRestaurantImage = (name) =>
     restaurantImages[name] || "/default-restaurant.jpg";
@@ -284,6 +307,12 @@ function UserDashboard() {
                     <p className="small-text">
                       {item.category || "Food"} | ₹{item.price}
                     </p>
+                    <button
+                     className="btn add-btn"
+                     onClick={() => handleAddToCart(item)}
+                    >
+                     Add +
+                    </button>
                   </div>
                 </div>
               ))}

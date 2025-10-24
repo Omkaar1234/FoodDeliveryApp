@@ -50,7 +50,7 @@ function RestaurantDetails() {
     fetchRestaurant();
   }, [id]);
 
-  const addToCart = (item) => {
+    const addToCart = (item) => {
     const exists = cart.find((i) => i._id === item._id);
     if (exists) {
       setCart(cart.map((i) => i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i));
