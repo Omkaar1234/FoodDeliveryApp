@@ -18,7 +18,6 @@ const orderSchema = new mongoose.Schema(
       enum: ["Pending", "Accepted", "Preparing", "Out for Delivery", "Delivered", "Cancelled"],
       default: "Pending",
     },
-    deliveryAddress: { type: String, trim: true },
   },
   { timestamps: true }
 );
