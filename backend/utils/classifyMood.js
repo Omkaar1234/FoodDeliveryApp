@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const HUGGINGFACE_API_KEY = process.env.HF_API_KEY;
-const MODEL = "cirimus/modernbert-base-go-emotions";
+const MODEL = "SamLowe/roberta-base-go_emotions";
 
 /**
  * Predicts mood from user text and returns emotion + tags
@@ -16,7 +16,7 @@ export const predictMood = async (text) => {
     }
     // 1️⃣ Call Hugging Face API
     const response = await axios.post(
-      `https://api-inference.huggingface.co/models/${MODEL}`,
+      `https://router.huggingface.co/hf-inference/models/${MODEL}`,
       { inputs: text },
       {
         headers: {
