@@ -35,8 +35,7 @@ function CartPage() {
           price,
           quantity,
         })),
-        total: totalPrice,
-        deliveryAddress: "Default Address", // Replace with actual user address if available
+        total: totalPrice
       };
 
       const res = await authFetch("/orders", {
