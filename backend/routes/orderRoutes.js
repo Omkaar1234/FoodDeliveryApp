@@ -5,7 +5,7 @@ import { authMiddleware, requireRole } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Allowed status transitions
+// ✅ Allowed status transitions
 const validStatusTransitions = {
   Pending: ["Accepted", "Cancelled"],
   Accepted: ["Preparing", "Cancelled"],
@@ -15,12 +15,13 @@ const validStatusTransitions = {
   Cancelled: [],
 };
 
-// -------------------- Place a new order (User only) --------------------
+// -------------------- PLACE A NEW ORDER (User only) --------------------
 router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   try {
     const { restaurantId, items, total } = req.body;
 
-    if (!restaurantId || !items?.length || !total) {
+    // ✅ Fix: allow total = 0 but still validate fields exist
+    if (!restaurantId || !items?.length || total == null) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -40,7 +41,7 @@ router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   }
 });
 
-// -------------------- Get all orders for logged-in restaurant --------------------
+// -------------------- GET ALL ORDERS (Restaurant) --------------------
 router.get(
   "/restaurant",
   authMiddleware,
@@ -48,7 +49,7 @@ router.get(
   async (req, res) => {
     try {
       const orders = await Order.find({ restaurantId: req.user.id })
-        .populate("userId", "name email contact") // ✅ Removed address
+        .populate("userId", "name email contact")
         .sort({ createdAt: -1 });
 
       res.json(orders);
@@ -59,7 +60,7 @@ router.get(
   }
 );
 
-// -------------------- Get all orders for logged-in user --------------------
+// -------------------- GET ALL ORDERS (User) --------------------
 router.get("/user", authMiddleware, requireRole("user"), async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user.id })
@@ -84,7 +85,7 @@ router.get("/user", authMiddleware, requireRole("user"), async (req, res) => {
   }
 });
 
-// -------------------- Update order status (Restaurant only) --------------------
+// -------------------- UPDATE ORDER STATUS (Restaurant only) --------------------
 router.put(
   "/:orderId/status",
   authMiddleware,
@@ -98,7 +99,7 @@ router.put(
         return res.status(404).json({ error: "Order not found" });
       }
 
-      // Validate allowed status transition
+      // ✅ Validate allowed status transition
       if (!validStatusTransitions[order.status].includes(status)) {
         return res.status(400).json({ error: "Invalid status transition" });
       }
@@ -106,9 +107,7 @@ router.put(
       order.status = status;
       await order.save();
 
-      // Populate user info before returning (✅ address removed)
       await order.populate("userId", "name email contact");
-
       res.json({ message: "Order status updated", order });
     } catch (err) {
       console.error("PUT /orders/:orderId/status error:", err);

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { authFetch } from "../services/authService"; // Ensure this exists
+import { authFetch } from "../services/authService";
 import "../styles/CartPage.css";
 
 function CartPage() {
@@ -9,17 +9,15 @@ function CartPage() {
     useContext(CartContext);
   const navigate = useNavigate();
 
-  // ---------------- Handle Quantity Change ----------------
   const handleQuantityChange = (itemId, restaurantId, value) => {
-    const quantity = Math.max(Number(value) || 1, 1); // Minimum 1
+    const quantity = Math.max(Number(value) || 1, 1);
     updateQuantity(itemId, restaurantId, quantity);
   };
 
-  // ---------------- Place Order ----------------
+  // ✅ Place order
   const placeOrder = async () => {
     if (cartItems.length === 0) return alert("Cart is empty!");
 
-    // Ensure single restaurant order
     const restaurantIds = [...new Set(cartItems.map((i) => i.restaurantId))];
     if (restaurantIds.length > 1) {
       return alert(
@@ -29,29 +27,24 @@ function CartPage() {
 
     try {
       const orderData = {
-        restaurantId: cartItems[0].restaurantId,
+        restaurantId: restaurantIds[0],
         items: cartItems.map(({ name, price, quantity }) => ({
           name,
           price,
           quantity,
         })),
-        total: totalPrice
+        total: totalPrice,
       };
 
-      const res = await authFetch("/orders", {
+      await authFetch("/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to place order");
-      }
-
-      alert("Order placed successfully!");
+      alert("✅ Order placed successfully!");
       clearCart();
-      navigate("/user/orders"); // Navigate to user orders to track
+      navigate("/user/orders");
     } catch (err) {
       console.error("Order placement failed:", err);
       alert(err.message || "Failed to place order. Try again.");

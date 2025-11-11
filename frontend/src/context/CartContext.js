@@ -6,13 +6,11 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  // Load cart from localStorage on mount
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
     if (storedCart) setCartItems(JSON.parse(storedCart));
   }, []);
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
@@ -20,6 +18,12 @@ export const CartProvider = ({ children }) => {
   // ✅ Add item to cart
   const addToCart = (item) => {
     const quantityToAdd = item.quantity || 1;
+
+    if (!item.restaurantId) {
+      console.error("❌ Missing restaurantId in item:", item);
+      return;
+    }
+
     setCartItems((prev) => {
       const existing = prev.find(
         (i) => i._id === item._id && i.restaurantId === item.restaurantId
@@ -37,7 +41,6 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // ✅ Remove item from cart
   const removeFromCart = (itemId, restaurantId) => {
     setCartItems((prev) =>
       prev.filter(
@@ -46,9 +49,8 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // ✅ Update item quantity
   const updateQuantity = (itemId, restaurantId, quantity) => {
-    const safeQuantity = Math.max(1, quantity); // minimum 1
+    const safeQuantity = Math.max(1, quantity);
     setCartItems((prev) =>
       prev.map((i) =>
         i._id === itemId && i.restaurantId === restaurantId
@@ -58,10 +60,8 @@ export const CartProvider = ({ children }) => {
     );
   };
 
-  // ✅ Clear entire cart
   const clearCart = () => setCartItems([]);
 
-  // ✅ Total price
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
