@@ -18,8 +18,8 @@ const validStatusTransitions = {
 // -------------------- Place a new order (User only) --------------------
 router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
   try {
-    const { restaurantId, items, total, deliveryAddress } = req.body;
-    if (!restaurantId || !items?.length || !total || !deliveryAddress) {
+    const { restaurantId, items, total } = req.body;
+    if (!restaurantId || !items?.length || !total ) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -28,7 +28,6 @@ router.post("/", authMiddleware, requireRole("user"), async (req, res) => {
       restaurantId,
       items,
       total,
-      deliveryAddress,
       status: "Pending",
     });
 
