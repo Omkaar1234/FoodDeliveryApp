@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const HUGGINGFACE_API_KEY = process.env.HF_API_KEY;
-const MODEL = "SamLowe/roberta-base-go_emotions";
+const MODEL = "cirimus/modernbert-base-go-emotions";
 
 /**
  * Predicts mood from user text and returns emotion + tags
